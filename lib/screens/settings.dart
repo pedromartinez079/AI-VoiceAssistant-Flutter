@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:ai_voice_assistant/providers/settings_provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -65,13 +66,39 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
   }
 
-  void _saveSettings() {
+  void _saveSettings() async {
     final settings = ref.read(settingsProvider.notifier);
+    final prefs = await SharedPreferences.getInstance();
+
+    if (_selectedLanguage == null || _selectedLanguage!.isEmpty) { return; }
+    if (_selectedVoice == null || _selectedVoice!.isEmpty) { return; }
+    if (_promptController.text.isEmpty) { return; }
+
     settings.setSettings(Settings(
       language: _selectedLanguage!,
       voice: _selectedVoice!,
       prompt: _promptController.text,
     ));
+
+    try {
+      prefs.setString('language', _selectedLanguage!);
+      prefs.setString('voice', _selectedVoice!);
+      prefs.setString('prompt', _promptController.text);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text(e.toString()),
+        ),
+      );
+    } finally {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text('Settings saved.'),
+        ),
+      );
+    }    
   }
 
   @override
@@ -79,7 +106,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() {
       _languages = [
         'es-ES', 'es-US', 'pt-BR', 'pt-PT',
-        'en-AU','en-US', 'en-GB', 'en-IN', 'en-NG',
+        'en-AU','en-US', 'en-GB', 'en-IN',
         'de-DE', 'fr-CA','fr-FR', 'it-IT', 'nl-NL', 'nl-BE','pl-PL',       
         'ja-JP', 'ko-KR',       
         'zh-TW', 'zh-CN', 'ru-RU',
@@ -159,7 +186,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 }
 
-/*final List<String> _languages = [
+/*
+      _languages = [
+        'es-ES', 'es-US', 'pt-BR', 'pt-PT',
+        'en-AU','en-US', 'en-GB', 'en-IN', 'en-NG',
+        'de-DE', 'fr-CA','fr-FR', 'it-IT', 'nl-NL', 'nl-BE','pl-PL',       
+        'ja-JP', 'ko-KR',       
+        'zh-TW', 'zh-CN', 'ru-RU',
+      ]; 
+
+final List<String> _languages = [
     'es-ES',
     'en-US',
     'fr-FR',
@@ -182,4 +218,5 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     'en-US-EmmaMultilingualNeural',
     'en-US-AndrewMultilingualNeural',
     'en-US-BrianMultilingualNeural',
-  ];*/
+  ];
+  */

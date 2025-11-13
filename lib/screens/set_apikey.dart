@@ -57,9 +57,25 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
 
   Future<void> storeapikey(AiAuth aiauth) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
-    await prefs.setString('ai', aiauth.ai);
-    await prefs.setString('apikey', aiauth.apikey);
+    try {
+      // await prefs.clear();
+      await prefs.setString('ai', aiauth.ai);
+      await prefs.setString('apikey', aiauth.apikey);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text(e.toString()),
+        ),
+      );
+    } finally {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text('Api Key saved.'),
+        ),
+      );
+    }
   }
 
   void _saveApiKey() async {
@@ -84,6 +100,7 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
 
     storeapikey(AiAuth(ai: aiService, apikey: apiKey));
     
+    await Future.delayed(const Duration(milliseconds: 2000));
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) => const AiAssistantScreen(),
