@@ -8,6 +8,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
+// import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:ai_voice_assistant/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -100,9 +101,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
     }    
   }
-
+  /*
+  void getLocales() async {
+    final speech = stt.SpeechToText();
+    final localeIds = await speech.locales();
+    print(localeIds.length);
+    for (var l in localeIds) {
+      var locale = '${l.localeId.substring(0,2)}_${l.localeId.substring(3,5)}';
+      print("ID: ${locale} - Nombre: ${l.name}");
+    }
+  }
+  */
   @override
-  void initState() {
+  void initState() {    
     setState(() {
       _languages = [
         'es-ES', 'es-US', 'pt-BR', 'pt-PT',
@@ -119,6 +130,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final prompt = ref.watch(settingsProvider).prompt;
     _promptController.text = prompt;
+
+    // getLocales();
     
     return Scaffold(
       appBar: AppBar(

@@ -77,7 +77,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
       if (_paused) {
         setState(() => _statusText = 'On pause');
-        //await Future.delayed(const Duration(milliseconds: 200));
         continue;
       }
 
@@ -88,6 +87,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       }
 
       final query = await listenOnce(_stt, _language!, setStatusText);
+      
       if (!_loopRunning || _end) break;
 
       if (query == null || query.trim().isEmpty) {
@@ -210,7 +210,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('AI Assistant'),
-        // Configuration : Action button > Configuration Screen
         actions: [
           IconButton(
             onPressed: () {
