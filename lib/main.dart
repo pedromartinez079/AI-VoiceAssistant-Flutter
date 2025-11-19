@@ -7,18 +7,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-
-//import 'package:ai_voice_assistant/ui.dart';
-
 final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
-  seedColor: const Color.fromARGB(255, 102, 6, 247),
-  //surface: const Color.fromARGB(255, 56, 49, 66),
-  surface: const Color.fromARGB(255, 102, 6, 247),
+  seedColor: const Color.fromARGB(255, 10, 51, 186),
+  surface: const Color.fromARGB(255, 10, 51, 186),
 );
 
 final theme = ThemeData().copyWith(
-  // useMaterial3: true,
   scaffoldBackgroundColor: colorScheme.surface,
   colorScheme: colorScheme,
   textTheme: GoogleFonts.ubuntuCondensedTextTheme().copyWith(
@@ -37,8 +32,6 @@ final theme = ThemeData().copyWith(
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
-  //prefs.remove('ai');
-  //prefs.remove('apikey');
   final bool hasAiAuth = prefs.containsKey('ai') && prefs.containsKey('apikey');
   final bool hasLanguage = prefs.containsKey('language');
   final bool hasVoice = prefs.containsKey('voice');

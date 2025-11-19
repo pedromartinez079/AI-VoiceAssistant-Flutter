@@ -7,12 +7,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:openai_dart/openai_dart.dart';
-// import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:ai_voice_assistant/services/stt.dart';
 import 'package:ai_voice_assistant/services/tts.dart';
 import 'package:ai_voice_assistant/services/openai.dart';
-// import 'package:ai_voice_assistant/screens/set_apikey.dart';
 import 'package:ai_voice_assistant/providers/settings_provider.dart';
 
 class AiAssistantScreen extends ConsumerStatefulWidget {
@@ -40,10 +38,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   String? _language;
   String? _voice;
 
-  bool _loopRunning = false;      // not self.stop_while
-  bool _end = false;              // self.end
-  bool _paused = false;           // self.paused
-  bool _isSpeaking = false;       // self.is_speaking
+  bool _loopRunning = false;
+  bool _end = false;
+  bool _paused = false;
+  bool _isSpeaking = false;
   
   void setIsSpeaking(bool b) { 
     setState(() {
@@ -64,14 +62,16 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   }
 
   Future<void> _startLoop() async {
-    if (_loopRunning) return; // prevent double start
+    if (_loopRunning) return; // if running don't start again
+
     setState(() {
       _loopRunning = true;
       _end = false;
     });
 
+    // Main loop for STT, AI answers and TTS processes
     while (_loopRunning && mounted) {
-      if (_end) {
+      if (!_loopRunning || _end) {
         break;
       }
 
@@ -82,17 +82,15 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
       if (_isSpeaking) {
         setState(() => _statusText = 'Speaking');
-        await Future.delayed(const Duration(milliseconds: 100));
+        // await Future.delayed(const Duration(milliseconds: 100));
         continue;
       }
 
       final query = await listenOnce(_stt, _language!, setStatusText);
       
-      if (!_loopRunning || _end) break;
-
       if (query == null || query.trim().isEmpty) {
         setState(() => _statusText = 'STT: Error or Empty');
-        await Future.delayed(const Duration(milliseconds: 200));
+        await Future.delayed(const Duration(milliseconds: 300));
         continue;
       }
       
@@ -121,8 +119,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         role: ChatCompletionMessageRole.assistant,
         content: answer,
       ));
-      
-      if (!_loopRunning || _end) break;
 
       setState(() {
         _chatMessage += '\nAI: $answer';
@@ -141,7 +137,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         _statusText = 'Speaking';
       });
       await speak(answer, _language!, _voice!,
-        setIsSpeaking, _tts, setChatMessage);
+        setIsSpeaking, _tts);
     }
 
     setState(() => _loopRunning = false);
@@ -163,9 +159,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   @override
   void initState() {
     super.initState();
-    /* WidgetsBinding.instance.addPostFrameCallback((_) {
-      configureTts();      
-    }); */
   }  
 
   @override
@@ -246,7 +239,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               ),
             ),            
             const SizedBox(height:10),
-            // Status : Text()
+            // Application Status
             Center(
               child: Text(
                 _statusText,
@@ -256,7 +249,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               ),
             ),
             const SizedBox(height:10),
-            // Chat :  SingleScrollView()
+            // Messages
             const Text('Messages:', style: TextStyle(color: Colors.white)),
             Expanded(              
               child: Container(
@@ -277,10 +270,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               ),
             ),
             const SizedBox(height:10),
-            // Row
+            // Buttons Row
             Row(
               children: [
-                // Start : Expanded > ElevatedButton
+                // Start
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _startLoop,
@@ -289,7 +282,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                   ),
                 ),
                 const SizedBox(width: 5,),
-                // Pause : Expanded > ElevatedButton
+                // Pause
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: !_loopRunning 
@@ -300,7 +293,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                   ),
                 ),
                 const SizedBox(width: 5,),
-                // Stop : Expanded > ElevatedButton
+                // Stop
                 Expanded(
                   child: ElevatedButton.icon(
                     onPressed: _stopLoop,

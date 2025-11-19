@@ -1,14 +1,14 @@
 import 'dart:async';
 
 Future<String?> listenOnce(stt, String language, Function setStatusText) async {
-  final done = Completer<String?>();
+  final completer = Completer<String?>();
   Timer? silenceTimer;
   const maxSilence = Duration(seconds: 12);
   void cancelAndReturnNull() {
-    if (!done.isCompleted) {
+    if (!completer.isCompleted) {
       stt.stop();
       silenceTimer?.cancel();
-      done.complete(null);
+      completer.complete(null);
     }
   }
   silenceTimer = Timer(maxSilence, cancelAndReturnNull);
@@ -18,37 +18,36 @@ Future<String?> listenOnce(stt, String language, Function setStatusText) async {
     final available = await stt.initialize(
       debugLogging: true,
       onStatus: (status) {
-        // print('STT Status: $status');
-        // Android: 'listening' | 'notListening', iOS may send 'done'
+        // Android: 'listening' | 'notListening', iOS: 'done'
         if (status == 'notListening' || status == 'done') {
-          if (!done.isCompleted) {
-            Future.delayed(const Duration(milliseconds: 100), () {
-              if (!done.isCompleted) done.complete(null);
+          if (!completer.isCompleted) {
+            Future.delayed(const Duration(milliseconds: 50), () {
+              if (!completer.isCompleted) completer.complete(null);
             });
           }
         }
       },
       onError: (e) {
         setStatusText('STT Error: ${e.errorMsg} (permanent: ${e.permanent})');
-        Future.delayed(const Duration(milliseconds: 100));
         if (e.errorMsg.contains("no_match") || 
             e.errorMsg.contains("no recognition result")) {
-          if (!done.isCompleted) done.complete(null);
+          if (!completer.isCompleted) completer.complete(null);
         } else if (e.permanent) {
           // Other errors
-          if (!done.isCompleted) done.complete(null);
-        }     
+          if (!completer.isCompleted) completer.complete(null);
+        }
       },
     );
     
     if (!available) {
       setStatusText('STT: Not available');
-      await Future.delayed(const Duration(milliseconds: 100));
+      await Future.delayed(const Duration(milliseconds: 300));
       return null;
     }
   }
+
   setStatusText('STT Listening');
-  await Future.delayed(const Duration(milliseconds: 100));
+  //await Future.delayed(const Duration(milliseconds: 50));
   stt.listen(
     onResult: (res) {
       if (res.recognizedWords.isNotEmpty) {
@@ -58,8 +57,8 @@ Future<String?> listenOnce(stt, String language, Function setStatusText) async {
       if (res.finalResult) {
         silenceTimer?.cancel();
         final text = res.recognizedWords.trim();
-        if (!done.isCompleted) {
-          done.complete(text.isEmpty ? null : text);
+        if (!completer.isCompleted) {
+          completer.complete(text.isEmpty ? null : text);
         }
       }
     },
@@ -70,7 +69,7 @@ Future<String?> listenOnce(stt, String language, Function setStatusText) async {
     cancelOnError: false,
   );
   
-  final result = await done.future.whenComplete(() {
+  final result = await completer.future.whenComplete(() {
     silenceTimer?.cancel();
   });
   

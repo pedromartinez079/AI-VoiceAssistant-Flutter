@@ -1,14 +1,6 @@
-// Set app configuration
-// Scaffold > Expanded > Column
-// Language : DropdownButtonFormField
-// Voice : DropdownButtonFormField
-// Initial prompt : TextField
-// Save Settings : ElevatedButton
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
-// import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:ai_voice_assistant/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -45,16 +37,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final FlutterTts tts = FlutterTts();
     final voices = await tts.getVoices;
     final filteredVoices = voices.where(
-      (v) => v["locale"] == _selectedLanguage && v["network_required"] == "0"
-      //(v) => v["network_required"] == "0"
+      (v) => v["locale"] == _selectedLanguage 
+        && v["network_required"] == "0"
     );
-    print(filteredVoices.length);
     
     List<String> voicesList = [];
     for (var v in filteredVoices) {
-      //if (v['locale'].substring(0,2) == 'zh') print('\n' + v['locale'].toString());
       voicesList.add(v['name']);
-      //print('\n' + v['locale'].toString());
     }
 
     setState(() {
@@ -101,17 +90,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       );
     }    
   }
-  /*
-  void getLocales() async {
-    final speech = stt.SpeechToText();
-    final localeIds = await speech.locales();
-    print(localeIds.length);
-    for (var l in localeIds) {
-      var locale = '${l.localeId.substring(0,2)}_${l.localeId.substring(3,5)}';
-      print("ID: ${locale} - Nombre: ${l.name}");
-    }
-  }
-  */
+  
   @override
   void initState() {    
     setState(() {
@@ -130,8 +109,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final prompt = ref.watch(settingsProvider).prompt;
     _promptController.text = prompt;
-
-    // getLocales();
     
     return Scaffold(
       appBar: AppBar(
@@ -139,60 +116,62 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       ),
       body: Padding(
         padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            DropdownButtonFormField<String>(
-              initialValue: _selectedLanguage,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Language',
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DropdownButtonFormField<String>(
+                initialValue: _selectedLanguage,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Language',
+                ),
+                items: _languages!
+                    .map((e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e),
+                        ))
+                    .toList(),
+                dropdownColor: Theme.of(context).colorScheme.surface,
+                onChanged: _onSelectLanguage,
               ),
-              items: _languages!
-                  .map((e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(e),
-                      ))
-                  .toList(),
-              dropdownColor: Theme.of(context).colorScheme.surface,
-              onChanged: _onSelectLanguage,
-            ),
-            const SizedBox(height: 20,),
-            DropdownButtonFormField<String>(
-              initialValue: _selectedVoice,
-              isExpanded: true,
-              decoration: const InputDecoration(
-                border: OutlineInputBorder(),
-                labelText: 'Voice',
+              const SizedBox(height: 20,),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedVoice,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'Voice',
+                ),
+                items: _voices
+                    .map((e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e),
+                        ))
+                    .toList(),
+                dropdownColor: Theme.of(context).colorScheme.surface,
+                onChanged: _onSelectVoice,
               ),
-              items: _voices
-                  .map((e) => DropdownMenuItem(
-                        value: e,
-                        child: Text(e),
-                      ))
-                  .toList(),
-              dropdownColor: Theme.of(context).colorScheme.surface,
-              onChanged: _onSelectVoice,
-            ),
-            const SizedBox(height: 20,),
-            TextField(
-              controller: _promptController,
-              readOnly: false,
-              maxLines: 7,
-              style: TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: 'AI Prompt',
-                border: OutlineInputBorder(),
+              const SizedBox(height: 20,),
+              TextField(
+                controller: _promptController,
+                readOnly: false,
+                maxLines: 7,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: 'AI Prompt',
+                  border: OutlineInputBorder(),
+                ),
               ),
-            ),
-            const SizedBox(height: 20,),
-            ElevatedButton.icon(
-              onPressed: _saveSettings,
-              icon: const Icon(Icons.settings),
-              label: const Text('Save Settings'),
-            ),
-          ],
+              const SizedBox(height: 20,),
+              ElevatedButton.icon(
+                onPressed: _saveSettings,
+                icon: const Icon(Icons.settings),
+                label: const Text('Save Settings'),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -207,29 +186,4 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         'ja-JP', 'ko-KR',       
         'zh-TW', 'zh-CN', 'ru-RU',
       ]; 
-
-final List<String> _languages = [
-    'es-ES',
-    'en-US',
-    'fr-FR',
-    'pt-BR',
-    'de-DE',
-    'ja-JP',
-    'zh-CN',
-  ];
-  final List<String> _voices = [
-    'es-PE-CamilaNeural',
-    'es-PE-AlexNeural',
-    'es-US-PalomaNeural',
-    'es-US-AlonsoNeural',
-    'es-AR-ElenaNeural',
-    'es-CO-SalomeNeural',
-    'es-ES-ElviraNeural',
-    'es-MX-DaliaNeural',
-    'es-VE-PaolaNeural',
-    'en-US-AvaMultilingualNeural',
-    'en-US-EmmaMultilingualNeural',
-    'en-US-AndrewMultilingualNeural',
-    'en-US-BrianMultilingualNeural',
-  ];
   */
