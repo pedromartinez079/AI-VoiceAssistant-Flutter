@@ -1,3 +1,8 @@
+/*
+To Do:
+  - Avoid Settings or ApiKey screens while loop is running
+*/
+
 import 'package:ai_voice_assistant/screens/set_apikey.dart';
 import 'package:ai_voice_assistant/screens/settings.dart';
 import 'package:flutter/material.dart';
@@ -34,18 +39,27 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   String? _apikey;
 
   final stt.SpeechToText _stt = stt.SpeechToText();
+  //bool _sttInitialized = false;
   final FlutterTts _tts = FlutterTts();
   String? _language;
   String? _voice;
 
   bool _loopRunning = false;
-  bool _end = false;
-  bool _paused = false;
+  //bool _end = false;
+  // bool _paused = false;
   bool _isSpeaking = false;
+  bool _isListening = false;
+  bool _isStopEnabled = false;
   
   void setIsSpeaking(bool b) { 
     setState(() {
       _isSpeaking = b;
+    });
+  }
+
+  void setIsListening(bool b) { 
+    setState(() {
+      _isListening = b;
     });
   }
 
@@ -61,33 +75,51 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     });
   }
 
+  void _scrollToBottom() {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 200),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  /*Future<void> _initializeSttOnce() async {
+    if (_sttInitialized) return;
+    _sttInitialized = await _stt.initialize(
+      debugLogging: true,
+      onStatus: (status) => print('STT status: $status'),
+      onError: (error) => print('STT error: $error'),
+    );
+  }*/
+
   Future<void> _startLoop() async {
     if (_loopRunning) return; // if running don't start again
 
     setState(() {
       _loopRunning = true;
-      _end = false;
+      _isStopEnabled = true;
     });
 
     // Main loop for STT, AI answers and TTS processes
     while (_loopRunning && mounted) {
-      if (!_loopRunning || _end) {
+      /*if (!_loopRunning) {
         break;
-      }
+      }*/
 
-      if (_paused) {
-        setState(() => _statusText = 'On pause');
+      if (_isSpeaking || _isListening) {
+        // setState(() => _statusText = 'Speaking');
         continue;
       }
 
-      if (_isSpeaking) {
-        setState(() => _statusText = 'Speaking');
-        // await Future.delayed(const Duration(milliseconds: 100));
-        continue;
-      }
-
-      final query = await listenOnce(_stt, _language!, setStatusText);
+      final query = await listenOnce(_stt, _language!, setStatusText,
+        setIsListening).catchError((_) => null);
       
+      if (!_loopRunning || !mounted) break;
+
       if (query == null || query.trim().isEmpty) {
         setState(() => _statusText = 'STT: Error or Empty');
         await Future.delayed(const Duration(milliseconds: 300));
@@ -98,23 +130,17 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         _chatMessage += '\nUser: $query';
         _statusText = 'Waiting for answer...';
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeOut,
-          );
-        }
-      });
+      _scrollToBottom();
       
       _messages.add(ChatCompletionMessage.user(
         role: ChatCompletionMessageRole.user,
         content: ChatCompletionUserMessageContent.string(query),
       ));
+      if (!_loopRunning || !mounted) break;
       final answer = await processQuery(
         _messages, _ai!, _apikey!, setStatusText
       );
+      if (!_loopRunning || !mounted) break;
       _messages.add(ChatCompletionMessage.assistant(
         role: ChatCompletionMessageRole.assistant,
         content: answer,
@@ -123,16 +149,9 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       setState(() {
         _chatMessage += '\nAI: $answer';
       });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (_scrollController.hasClients) {
-          _scrollController.animateTo(
-            _scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 100),
-            curve: Curves.easeOut,
-          );
-        }
-      });
+      _scrollToBottom();
       
+      if (!_loopRunning || !mounted) break;
       setState(() {
         _statusText = 'Speaking';
       });
@@ -144,21 +163,28 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   }
 
   Future<void> _stopLoop() async {
+    if (_isListening) { return; }
+
+    _loopRunning = false;
+    _isStopEnabled = false;
+
     setState(() {
-      _loopRunning = false;
-      _statusText = 'Application Stopped';
+      _isSpeaking = false;
+      _statusText = 'Stopping...';
     });
-    try {
-      await _stt.stop();
-    } catch (_) {}
-    try {
-      await _tts.stop();
-    } catch (_) {}
+
+    await Future.wait([
+      //_stt.stop().catchError((_) => null),
+      _stt.cancel().catchError((_) => null),
+      _tts.stop().catchError((_) => null),
+    ]);
+    setState(() => _statusText = 'Application Stopped');
   }
 
   @override
   void initState() {
     super.initState();
+    //_initializeSttOnce();
   }  
 
   @override
@@ -282,21 +308,10 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
                   ),
                 ),
                 const SizedBox(width: 5,),
-                // Pause
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: !_loopRunning 
-                      ? null 
-                      : () => setState(() => _paused = !_paused),
-                    icon: const Icon(Icons.pause),
-                    label: const Text('Pause'),
-                  ),
-                ),
-                const SizedBox(width: 5,),
                 // Stop
                 Expanded(
                   child: ElevatedButton.icon(
-                    onPressed: _stopLoop,
+                    onPressed: _isStopEnabled ? _stopLoop : null,
                     icon: const Icon(Icons.stop),
                     label: const Text('Stop'),
                   ),

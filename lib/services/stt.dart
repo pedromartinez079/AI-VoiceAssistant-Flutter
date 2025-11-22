@@ -1,12 +1,13 @@
 import 'dart:async';
 
-Future<String?> listenOnce(stt, String language, Function setStatusText) async {
+Future<String?> listenOnce(stt, String language, Function setStatusText,
+  Function setIsListening) async {
   final completer = Completer<String?>();
   Timer? silenceTimer;
   const maxSilence = Duration(seconds: 12);
   void cancelAndReturnNull() {
     if (!completer.isCompleted) {
-      stt.stop();
+      stt.cancel();
       silenceTimer?.cancel();
       completer.complete(null);
     }
@@ -47,6 +48,7 @@ Future<String?> listenOnce(stt, String language, Function setStatusText) async {
   }
 
   setStatusText('STT Listening');
+  setIsListening(true);
   //await Future.delayed(const Duration(milliseconds: 50));
   stt.listen(
     onResult: (res) {
@@ -74,8 +76,9 @@ Future<String?> listenOnce(stt, String language, Function setStatusText) async {
   });
   
   try {
-    await stt.stop();
+    await stt.cancel();
   } catch (_) {}
   
+  setIsListening(false);
   return result;
-} 
+}
