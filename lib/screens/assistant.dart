@@ -1,7 +1,3 @@
-/*
-To Do:
-  - Avoid Settings or ApiKey screens while loop is running
-*/
 
 import 'package:ai_voice_assistant/screens/set_apikey.dart';
 import 'package:ai_voice_assistant/screens/settings.dart';
@@ -39,40 +35,46 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   String? _apikey;
 
   final stt.SpeechToText _stt = stt.SpeechToText();
-  //bool _sttInitialized = false;
   final FlutterTts _tts = FlutterTts();
   String? _language;
   String? _voice;
 
   bool _loopRunning = false;
-  //bool _end = false;
-  // bool _paused = false;
   bool _isSpeaking = false;
   bool _isListening = false;
   bool _isStopEnabled = false;
   
   void setIsSpeaking(bool b) { 
-    setState(() {
-      _isSpeaking = b;
-    });
+    if (mounted) {
+      setState(() {
+        _isSpeaking = b;
+      });
+    }
   }
 
   void setIsListening(bool b) { 
-    setState(() {
-      _isListening = b;
-    });
+    if (mounted) {
+      setState(() {
+        _isListening = b;
+        _isStopEnabled = !b;
+      });
+    }
   }
 
   void setChatMessage(String s) {
-    setState(() {
-      _chatMessage += s;
-    });
+      if (mounted) {
+      setState(() {
+        _chatMessage += s;
+      });
+    }
   }
 
   void setStatusText(String s) {
-    setState(() {
-      _statusText = s;
-    });
+    if (mounted) {
+      setState(() {
+        _statusText = s;
+      });
+    }
   }
 
   void _scrollToBottom() {
@@ -87,17 +89,8 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     });
   }
 
-  /*Future<void> _initializeSttOnce() async {
-    if (_sttInitialized) return;
-    _sttInitialized = await _stt.initialize(
-      debugLogging: true,
-      onStatus: (status) => print('STT status: $status'),
-      onError: (error) => print('STT error: $error'),
-    );
-  }*/
-
   Future<void> _startLoop() async {
-    if (_loopRunning) return; // if running don't start again
+    if (_loopRunning) return; // if lopp active, don't start again
 
     setState(() {
       _loopRunning = true;
@@ -106,52 +99,53 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
     // Main loop for STT, AI answers and TTS processes
     while (_loopRunning && mounted) {
-      /*if (!_loopRunning) {
-        break;
-      }*/
-
+      if (!_loopRunning || !mounted) break;
+      
       if (_isSpeaking || _isListening) {
-        // setState(() => _statusText = 'Speaking');
         continue;
-      }
-
+      }      
+      
+      // STT
       final query = await listenOnce(_stt, _language!, setStatusText,
         setIsListening).catchError((_) => null);
-      
       if (!_loopRunning || !mounted) break;
-
       if (query == null || query.trim().isEmpty) {
         setState(() => _statusText = 'STT: Error or Empty');
         await Future.delayed(const Duration(milliseconds: 300));
         continue;
-      }
-      
+      }      
       setState(() {
         _chatMessage += '\nUser: $query';
         _statusText = 'Waiting for answer...';
       });
       _scrollToBottom();
       
+      if (!_loopRunning || !mounted) break;
+
+      // AI API answer
       _messages.add(ChatCompletionMessage.user(
         role: ChatCompletionMessageRole.user,
         content: ChatCompletionUserMessageContent.string(query),
-      ));
-      if (!_loopRunning || !mounted) break;
+      ));      
+      
       final answer = await processQuery(
         _messages, _ai!, _apikey!, setStatusText
       );
-      if (!_loopRunning || !mounted) break;
+      
       _messages.add(ChatCompletionMessage.assistant(
         role: ChatCompletionMessageRole.assistant,
         content: answer,
       ));
-
-      setState(() {
-        _chatMessage += '\nAI: $answer';
-      });
-      _scrollToBottom();
+      if (mounted) {
+        setState(() {
+          _chatMessage += '\nAI: $answer';
+        });      
+        _scrollToBottom();
+      }
       
       if (!_loopRunning || !mounted) break;
+      
+      // TTS 
       setState(() {
         _statusText = 'Speaking';
       });
@@ -159,7 +153,9 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         setIsSpeaking, _tts);
     }
 
-    setState(() => _loopRunning = false);
+    if (mounted) {
+      setState(() => _loopRunning = false);
+    }
   }
 
   Future<void> _stopLoop() async {
@@ -167,24 +163,24 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
     _loopRunning = false;
     _isStopEnabled = false;
+    _isListening = false;
+    _isSpeaking = false;
 
-    setState(() {
+    /*setState(() {
+      _isListening = false;
       _isSpeaking = false;
-      _statusText = 'Stopping...';
-    });
+    });*/
 
     await Future.wait([
-      //_stt.stop().catchError((_) => null),
       _stt.cancel().catchError((_) => null),
       _tts.stop().catchError((_) => null),
     ]);
-    setState(() => _statusText = 'Application Stopped');
+    if (mounted) setState(() => _statusText = 'Application Stopped');
   }
 
   @override
   void initState() {
     super.initState();
-    //_initializeSttOnce();
   }  
 
   @override
@@ -192,7 +188,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     _scrollController.dispose();
     _stopLoop();
     _tts.stop();
-    _stt.stop();
+    _stt.cancel();
     super.dispose();
   }
 
