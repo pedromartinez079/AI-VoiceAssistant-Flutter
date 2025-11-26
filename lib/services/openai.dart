@@ -1,3 +1,8 @@
+/*
+To Do:
+  - Select Model in Settings Screen
+  - Select Temperature in Settings Screen
+*/
 
 import 'package:openai_dart/openai_dart.dart';
 

@@ -5,7 +5,9 @@ import 'package:ai_voice_assistant/providers/settings_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
-  const SettingsScreen({super.key});
+  const SettingsScreen({super.key, required this.updateInitialPrompt});
+
+  final Function updateInitialPrompt;
 
   @override
   ConsumerState<SettingsScreen> createState() {
@@ -74,6 +76,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       prefs.setString('language', _selectedLanguage!);
       prefs.setString('voice', _selectedVoice!);
       prefs.setString('prompt', _promptController.text);
+      widget.updateInitialPrompt(_promptController.text);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

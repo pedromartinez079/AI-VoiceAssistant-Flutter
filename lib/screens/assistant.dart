@@ -77,6 +77,18 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     }
   }
 
+  void updateInitialPrompt(String s) {
+    final initialPrompt = ChatCompletionMessage.user(
+      content: ChatCompletionUserMessageContent.string(s),
+    );
+    
+    if (_messages.isNotEmpty) {
+      _messages[0] = initialPrompt;
+    } else {
+      _messages.add(initialPrompt);
+    }
+  }
+
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -111,7 +123,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       if (!_loopRunning || !mounted) break;
       if (query == null || query.trim().isEmpty) {
         setState(() => _statusText = 'STT: Error or Empty');
-        await Future.delayed(const Duration(milliseconds: 300));
+        await Future.delayed(const Duration(milliseconds: 2000));
         continue;
       }      
       setState(() {
@@ -165,11 +177,6 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     _isStopEnabled = false;
     _isListening = false;
     _isSpeaking = false;
-
-    /*setState(() {
-      _isListening = false;
-      _isSpeaking = false;
-    });*/
 
     await Future.wait([
       _stt.cancel().catchError((_) => null),
@@ -230,7 +237,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (ctx) => const SettingsScreen(),
+                  builder: (ctx) => SettingsScreen(updateInitialPrompt: updateInitialPrompt),
                 )
               );
             }, 

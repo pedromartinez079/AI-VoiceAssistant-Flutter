@@ -47,6 +47,12 @@ Future<String?> listenOnce(stt, String language, Function setStatusText,
     }
   }
 
+  if (!stt.isAvailable) {
+    setStatusText('STT: Not available');
+    await Future.delayed(const Duration(milliseconds: 300));
+    return null;
+  }
+
   setStatusText('STT Listening');
   setIsListening(true);
   //await Future.delayed(const Duration(milliseconds: 50));
