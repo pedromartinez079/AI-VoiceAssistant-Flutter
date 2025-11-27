@@ -33,6 +33,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   bool _isInitialMessageSet = false;
   String? _ai;
   String? _apikey;
+  String? _aimodel;
 
   final stt.SpeechToText _stt = stt.SpeechToText();
   final FlutterTts _tts = FlutterTts();
@@ -141,7 +142,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       ));      
       
       final answer = await processQuery(
-        _messages, _ai!, _apikey!, setStatusText
+        _messages, _ai!, _apikey!, _aimodel!, setStatusText
       );
       
       _messages.add(ChatCompletionMessage.assistant(
@@ -226,6 +227,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       setState(() {
         _language = settings.language;
         _voice = settings.voice;
+        _aimodel = settings.model;
       });
     });
     

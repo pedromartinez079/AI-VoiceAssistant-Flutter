@@ -34,7 +34,7 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
     try {
       final models = await client.listModels();
       setState(() {
-        _informationController.text = 'Api Key Ok.\n\n$models.toString()';
+        _informationController.text = 'Api Key Ok.\n\nModels in this API: ${models.data.length}';
       });
       client.endSession();
       return true;
@@ -43,12 +43,6 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
         setState(() {
           _informationController.text = e.body.toString();
         });
-        /*ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            backgroundColor: Colors.orange,
-            content: Text(e.body.toString()),
-          ),
-        );*/
       }
       client.endSession();
       return false;
@@ -180,7 +174,7 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
             TextField(
               controller: _informationController,
               readOnly: true,
-              maxLines: 12,
+              maxLines: 6,
               style: TextStyle(color: Colors.white),
               decoration: InputDecoration(
                 labelText: 'Information',

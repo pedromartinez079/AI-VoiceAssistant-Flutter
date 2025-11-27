@@ -1,3 +1,8 @@
+/*
+To Do:
+  - Add temperature: Slider widget
+*/
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -16,11 +21,22 @@ class SettingsScreen extends ConsumerStatefulWidget {
 }
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {  
+  List<String>? _models;
   List<String>? _languages;
   List<String> _voices = [];
+  String? _selectedModel;
   String? _selectedLanguage;
   String? _selectedVoice;
   final _promptController = TextEditingController();
+
+  List<String>? _modelsOpenAI;
+  List<String>? _modelsXAI;
+
+  void _onSelectModel(value) {
+    setState(() {
+      _selectedModel = value;
+    });
+  }
 
   void _onSelectLanguage(value) {
     setState(() {
@@ -61,20 +77,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _saveSettings() async {
     final settings = ref.read(settingsProvider.notifier);
     final prefs = await SharedPreferences.getInstance();
-
-    if (_selectedLanguage == null || _selectedLanguage!.isEmpty) { return; }
-    if (_selectedVoice == null || _selectedVoice!.isEmpty) { return; }
+    
+    if (_selectedLanguage == null || _selectedLanguage!.isEmpty) {
+      _selectedLanguage = settings.getLanguage();
+    }
+    if (_selectedVoice == null || _selectedVoice!.isEmpty) {
+      _selectedVoice = settings.getVoice();
+    }
+    if (_selectedModel == null || _selectedModel!.isEmpty) {
+      _selectedModel == settings.getModel();
+    }
     if (_promptController.text.isEmpty) { return; }
 
     settings.setSettings(Settings(
       language: _selectedLanguage!,
       voice: _selectedVoice!,
+      model: _selectedModel!,
       prompt: _promptController.text,
     ));
 
     try {
       prefs.setString('language', _selectedLanguage!);
       prefs.setString('voice', _selectedVoice!);
+      prefs.setString('model', _selectedModel!);
       prefs.setString('prompt', _promptController.text);
       widget.updateInitialPrompt(_promptController.text);
     } catch (e) {
@@ -103,7 +128,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         'de-DE', 'fr-CA','fr-FR', 'it-IT', 'nl-NL', 'nl-BE','pl-PL',       
         'ja-JP', 'ko-KR',       
         'zh-TW', 'zh-CN', 'ru-RU',
-      ];      
+      ];
+      _modelsOpenAI = ['gpt-5.1','gpt-5','gpt-5-mini','gpt-5-nano','gpt-4.1',
+        'gpt-4.1-mini','gpt-4.1-nano'];
+      _modelsXAI = ['grok-4-1-fast-reasoning','grok-4-1-fast-non-reasoning',
+        'grok-4-1-fast', 'grok-4-fast-reasoning','grok-4-fast-non-reasoning',
+        'grok-4'];
     });
     super.initState();
   }
@@ -112,6 +142,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final prompt = ref.watch(settingsProvider).prompt;
     _promptController.text = prompt;
+    final aiService = ref.watch(apiKeyProvider).ai;
+    if (aiService == 'xai') { _models = _modelsXAI; }
+    else { _models = _modelsOpenAI; }
     
     return Scaffold(
       appBar: AppBar(
@@ -157,6 +190,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: _onSelectVoice,
               ),
               const SizedBox(height: 20,),
+              DropdownButtonFormField<String>(
+                initialValue: _selectedModel,
+                isExpanded: true,
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                  labelText: 'AI Model',
+                ),
+                items: _models!
+                    .map((e) => DropdownMenuItem(
+                          value: e,
+                          child: Text(e),
+                        ))
+                    .toList(),
+                dropdownColor: Theme.of(context).colorScheme.surface,
+                onChanged: _onSelectModel,
+              ),
+              const SizedBox(height: 20,),              
               TextField(
                 controller: _promptController,
                 readOnly: false,

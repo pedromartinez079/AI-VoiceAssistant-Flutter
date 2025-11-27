@@ -13,6 +13,9 @@ class ApiKeyNotifier extends StateNotifier<AiAuth> {
   void setApiKey(AiAuth aiAuth) {
     state = aiAuth;
   }
+  
+  String getAi() { return state.ai; }
+  String getApiKey() { return state.apikey; }
 }
 
 final apiKeyProvider =
@@ -24,22 +27,29 @@ final apiKeyProvider =
 class Settings {
   final String language;
   final String voice;
+  final String model;
   final String prompt;
 
   const Settings({
     required this.language,
     required this.voice,
+    required this.model,
     required this.prompt,
   });
 }
 
 class SettingsNotifier extends StateNotifier<Settings> {
   SettingsNotifier() 
-    : super(const Settings(language: '', voice: '', prompt: ''));
+    : super(const Settings(language: '', voice: '', model: '', prompt: ''));
 
   void setSettings(Settings settings) {
     state = settings;
   }
+
+  String getLanguage() { return state.language; }
+  String getVoice() { return state.voice; }
+  String getModel() { return state.model; }
+  String getPrompt() { return state.prompt; }
 }
 
 final settingsProvider =
