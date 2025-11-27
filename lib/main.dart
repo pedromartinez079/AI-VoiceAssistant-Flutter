@@ -36,12 +36,14 @@ void main() async {
   final bool hasLanguage = prefs.containsKey('language');
   final bool hasVoice = prefs.containsKey('voice');
   final bool hasModel = prefs.containsKey('model');
+  final bool hasTemperature = prefs.containsKey('temperature');
   final bool hasPrompt = prefs.containsKey('prompt');
   String? ai;
   String? apikey;
   String? language;
   String? voice;
   String? model;
+  double? temperature;
   String? prompt;
 
   if (hasAiAuth) {
@@ -58,6 +60,8 @@ void main() async {
   else { voice = 'es-es-x-eea-local'; }
   if (hasModel) { model = prefs.getString('model'); }
   else { model = ''; }
+  if (hasTemperature) { temperature = prefs.getDouble('temperature'); }
+  else { temperature = 0.8; }
   if (hasPrompt) { prompt = prefs.getString('prompt'); }
   else { prompt = (
     'Eres un asistente personal inteligente y amable. Tus respuestas son convertidas a voz usando servicios de TTS, evita respuestas muy largas o caracteres que no se puedan convertir a voz.'
@@ -71,6 +75,7 @@ void main() async {
       language: language!,
       voice: voice!,
       model: model!,
+      temperature: temperature!,
       prompt: prompt!,
     )),
   );
@@ -85,6 +90,7 @@ class AIVoiceAssistant extends ConsumerWidget {
     required this.language,
     required this.voice,
     required this.model,
+    required this.temperature,
     required this.prompt,
   });
 
@@ -94,6 +100,7 @@ class AIVoiceAssistant extends ConsumerWidget {
   final String language;
   final String voice;
   final String model;
+  final double temperature;
   final String prompt;  
 
   @override
@@ -105,7 +112,8 @@ class AIVoiceAssistant extends ConsumerWidget {
         apikeyNotifier.setApiKey(AiAuth(ai: ai, apikey: apikey));
       }
       settingsNotifier.setSettings(
-        Settings(language: language, voice: voice, model: model, prompt: prompt)
+        Settings(language: language, voice: voice, model: model, 
+          temperature: temperature, prompt: prompt)
       );
     });
 

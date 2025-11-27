@@ -1,6 +1,5 @@
 /*
 To Do:
-  - Add temperature: Slider widget
 */
 
 import 'package:flutter/material.dart';
@@ -25,6 +24,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   List<String>? _languages;
   List<String> _voices = [];
   String? _selectedModel;
+  double? _selectedTemperature;
   String? _selectedLanguage;
   String? _selectedVoice;
   final _promptController = TextEditingController();
@@ -35,6 +35,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   void _onSelectModel(value) {
     setState(() {
       _selectedModel = value;
+    });
+  }
+
+  void _onSelectTemperature(value) {
+    setState(() {
+      _selectedTemperature = value;
     });
   }
 
@@ -85,14 +91,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _selectedVoice = settings.getVoice();
     }
     if (_selectedModel == null || _selectedModel!.isEmpty) {
-      _selectedModel == settings.getModel();
+      _selectedModel = settings.getModel();
     }
+    _selectedTemperature ??= settings.getTemperature();
     if (_promptController.text.isEmpty) { return; }
 
     settings.setSettings(Settings(
       language: _selectedLanguage!,
       voice: _selectedVoice!,
       model: _selectedModel!,
+      temperature: _selectedTemperature!,
       prompt: _promptController.text,
     ));
 
@@ -100,6 +108,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       prefs.setString('language', _selectedLanguage!);
       prefs.setString('voice', _selectedVoice!);
       prefs.setString('model', _selectedModel!);
+      prefs.setDouble('temperature', _selectedTemperature!);
       prefs.setString('prompt', _promptController.text);
       widget.updateInitialPrompt(_promptController.text);
     } catch (e) {
@@ -141,6 +150,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final prompt = ref.watch(settingsProvider).prompt;
+    _selectedTemperature ??= ref.watch(settingsProvider).temperature;
     _promptController.text = prompt;
     final aiService = ref.watch(apiKeyProvider).ai;
     if (aiService == 'xai') { _models = _modelsXAI; }
@@ -190,21 +200,37 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: _onSelectVoice,
               ),
               const SizedBox(height: 20,),
-              DropdownButtonFormField<String>(
-                initialValue: _selectedModel,
-                isExpanded: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'AI Model',
-                ),
-                items: _models!
-                    .map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(e),
-                        ))
-                    .toList(),
-                dropdownColor: Theme.of(context).colorScheme.surface,
-                onChanged: _onSelectModel,
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _selectedModel,
+                      isExpanded: true,
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        labelText: 'AI Model',
+                      ),
+                      items: _models!
+                          .map((e) => DropdownMenuItem(
+                                value: e,
+                                child: Text(e),
+                              ))
+                          .toList(),
+                      dropdownColor: Theme.of(context).colorScheme.surface,
+                      onChanged: _onSelectModel,
+                    ),
+                  ),
+                  Expanded(
+                    child: Slider(
+                      value: _selectedTemperature!,
+                      label: "Temperature $_selectedTemperature",
+                      min: 0,
+                      max: 2,
+                      divisions: 200,
+                      onChanged: _onSelectTemperature,
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 20,),              
               TextField(

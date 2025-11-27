@@ -1,6 +1,5 @@
 /*
 To Do:
-  - Select Temperature in Settings Screen 0..2
 */
 
 import 'dart:convert';
@@ -9,10 +8,9 @@ import 'package:openai_dart/openai_dart.dart';
 
 Future<String> processQuery(
   List<ChatCompletionMessage> messagesList, String ai, 
-  String apikey, String aiModel, Function setStatusText) async { 
+  String apikey, String aiModel, double temperature, Function setStatusText) async { 
     String? baseUrl;
     ChatCompletionModel? model;
-    double temperature = 0.8;
 
     if (ai == 'openai') { 
       baseUrl = 'https://api.openai.com/v1'; 
@@ -40,7 +38,7 @@ Future<String> processQuery(
       final response = await client.createChatCompletion(
         request: request,
       );
-      // message > role: ChatCompletionMessageRole.assistant, content: String
+      // print(model); print(temperature);
       return response.choices[0].message.content!;
     } catch(e) {
       if (e is OpenAIClientException) {
@@ -51,8 +49,11 @@ Future<String> processQuery(
           parsed['error'] is Map<String, dynamic> &&
           (parsed['error'] as Map<String, dynamic>).containsKey('message')) {
           return 'Answer from $ai failed. ${parsed["error"]["message"]}';
-          //print(parsed["error"]["message"]);
-          }
+        }
+        else if (parsed is Map<String, dynamic> &&
+          parsed.containsKey('error')) {
+          return 'Answer from $ai failed. ${parsed["error"]}';
+        }
       }      
       return 'Answer from $ai failed. ${e.toString()}';
     } finally { client.endSession(); }
