@@ -1,11 +1,11 @@
-import 'package:ai_voice_assistant/providers/settings_provider.dart';
-import 'package:ai_voice_assistant/screens/assistant.dart';
-import 'package:ai_voice_assistant/screens/set_apikey.dart';
-
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:ai_voice_assistant/providers/settings_provider.dart';
+import 'package:ai_voice_assistant/screens/assistant.dart';
+import 'package:ai_voice_assistant/screens/set_apikey.dart';
 
 final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
@@ -46,6 +46,7 @@ void main() async {
   double? temperature;
   String? prompt;
 
+  // Check if setting values exist, if not use default values
   if (hasAiAuth) {
     ai = prefs.getString('ai');
     apikey = prefs.getString('apikey');    
@@ -56,12 +57,16 @@ void main() async {
 
   if (hasLanguage) { language = prefs.getString('language'); }
   else { language = 'es-ES'; }
+
   if (hasVoice) { voice = prefs.getString('voice'); }
   else { voice = 'es-es-x-eea-local'; }
+
   if (hasModel) { model = prefs.getString('model'); }
   else { model = ''; }
+
   if (hasTemperature) { temperature = prefs.getDouble('temperature'); }
   else { temperature = 0.8; }
+
   if (hasPrompt) { prompt = prefs.getString('prompt'); }
   else { prompt = (
     'Eres un asistente personal inteligente y amable. Tus respuestas son convertidas a voz usando servicios de TTS, evita respuestas muy largas o caracteres que no se puedan convertir a voz.'
@@ -108,6 +113,7 @@ class AIVoiceAssistant extends ConsumerWidget {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final apikeyNotifier = ref.read(apiKeyProvider.notifier);
       final settingsNotifier = ref.read(settingsProvider.notifier);
+      // Load values into providers
       if (hasAiAuth) {
         apikeyNotifier.setApiKey(AiAuth(ai: ai, apikey: apikey));
       }
@@ -120,7 +126,7 @@ class AIVoiceAssistant extends ConsumerWidget {
     return MaterialApp(
       title: 'AI Voice Assistant',
       theme: theme,
-      home: hasAiAuth
+      home: hasAiAuth // If api key isn't set, first set Ai Service and api key
         ? const AiAssistantScreen()
         : const SetApiKeyScreen()
     );

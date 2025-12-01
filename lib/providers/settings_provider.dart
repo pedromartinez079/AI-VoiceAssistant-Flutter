@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/legacy.dart';
 
+// AI Auth provider: AI Service & Api Key
 class AiAuth {
   final String ai;
   final String apikey;
@@ -23,7 +24,7 @@ final apiKeyProvider =
     return ApiKeyNotifier();
   });
 
-
+// Settings provider: Language, Voice, AI Model, AI Temperature, AI Prompt
 class Settings {
   final String language;
   final String voice;

@@ -1,7 +1,3 @@
-/*
-To Do:
-*/
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
@@ -48,7 +44,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     setState(() {
       _selectedLanguage = value;
     });
-    _getVoices();
+    _getVoices(); // Update available voices for selected language
   }
 
   void _onSelectVoice(value) {
@@ -57,6 +53,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
   }
 
+  // After selecting language, get available voices in device
   void _getVoices() async {
     final FlutterTts tts = FlutterTts();
     final voices = await tts.getVoices;
@@ -80,10 +77,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     });
   }
 
+  // Method for Save Settings button
   void _saveSettings() async {
     final settings = ref.read(settingsProvider.notifier);
     final prefs = await SharedPreferences.getInstance();
     
+    // If not change for a parameter, keep old value
     if (_selectedLanguage == null || _selectedLanguage!.isEmpty) {
       _selectedLanguage = settings.getLanguage();
     }
@@ -96,6 +95,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     _selectedTemperature ??= settings.getTemperature();
     if (_promptController.text.isEmpty) { return; }
 
+    // Update provider
     settings.setSettings(Settings(
       language: _selectedLanguage!,
       voice: _selectedVoice!,
@@ -104,12 +104,14 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       prompt: _promptController.text,
     ));
 
+    // Update Shared Preferences, device storage
     try {
       prefs.setString('language', _selectedLanguage!);
       prefs.setString('voice', _selectedVoice!);
       prefs.setString('model', _selectedModel!);
       prefs.setDouble('temperature', _selectedTemperature!);
       prefs.setString('prompt', _promptController.text);
+      // Update initial message for chat messages
       widget.updateInitialPrompt(_promptController.text);
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -150,9 +152,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final prompt = ref.watch(settingsProvider).prompt;
-    _selectedTemperature ??= ref.watch(settingsProvider).temperature;
     _promptController.text = prompt;
+    _selectedTemperature ??= ref.watch(settingsProvider).temperature; // If null use value from provider
     final aiService = ref.watch(apiKeyProvider).ai;
+    // Models depending on AI Service
     if (aiService == 'xai') { _models = _modelsXAI; }
     else { _models = _modelsOpenAI; }
     
@@ -166,6 +169,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              // Select language
               DropdownButtonFormField<String>(
                 initialValue: _selectedLanguage,
                 isExpanded: true,
@@ -183,6 +187,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 onChanged: _onSelectLanguage,
               ),
               const SizedBox(height: 20,),
+              // Select voice
               DropdownButtonFormField<String>(
                 initialValue: _selectedVoice,
                 isExpanded: true,
@@ -202,6 +207,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               const SizedBox(height: 20,),
               Row(
                 children: [
+                  // Select model
                   Expanded(
                     child: DropdownButtonFormField<String>(
                       initialValue: _selectedModel,
@@ -220,6 +226,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       onChanged: _onSelectModel,
                     ),
                   ),
+                  // Select temperature
                   Expanded(
                     child: Slider(
                       value: _selectedTemperature!,
@@ -233,6 +240,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ],
               ),
               const SizedBox(height: 20,),              
+              // Edit prompt or initial message
               TextField(
                 controller: _promptController,
                 readOnly: false,
@@ -256,13 +264,3 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     );
   }
 }
-
-/*
-      _languages = [
-        'es-ES', 'es-US', 'pt-BR', 'pt-PT',
-        'en-AU','en-US', 'en-GB', 'en-IN', 'en-NG',
-        'de-DE', 'fr-CA','fr-FR', 'it-IT', 'nl-NL', 'nl-BE','pl-PL',       
-        'ja-JP', 'ko-KR',       
-        'zh-TW', 'zh-CN', 'ru-RU',
-      ]; 
-  */

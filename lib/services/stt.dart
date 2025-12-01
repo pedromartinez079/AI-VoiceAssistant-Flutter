@@ -19,7 +19,7 @@ Future<String?> listenOnce(stt, String language, Function setStatusText,
     final available = await stt.initialize(
       debugLogging: true,
       onStatus: (status) {
-        // Android: 'listening' | 'notListening', iOS: 'done'
+        // Android: 'listening' or 'notListening' | iOS: 'done'
         if (status == 'notListening' || status == 'done') {
           if (!completer.isCompleted) {
             Future.delayed(const Duration(milliseconds: 50), () {
@@ -29,7 +29,7 @@ Future<String?> listenOnce(stt, String language, Function setStatusText,
         }
       },
       onError: (e) {
-        setStatusText('STT Error: ${e.errorMsg} (permanent: ${e.permanent})');
+        setStatusText('STT Error: ${e.errorMsg})');
         if (e.errorMsg.contains("no_match") || 
             e.errorMsg.contains("no recognition result")) {
           if (!completer.isCompleted) completer.complete(null);
@@ -55,7 +55,6 @@ Future<String?> listenOnce(stt, String language, Function setStatusText,
 
   setStatusText('STT Listening');
   setIsListening(true);
-  //await Future.delayed(const Duration(milliseconds: 50));
   stt.listen(
     onResult: (res) {
       if (res.recognizedWords.isNotEmpty) {

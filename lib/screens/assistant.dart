@@ -1,6 +1,3 @@
-
-import 'package:ai_voice_assistant/screens/set_apikey.dart';
-import 'package:ai_voice_assistant/screens/settings.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +6,8 @@ import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:openai_dart/openai_dart.dart';
 
+import 'package:ai_voice_assistant/screens/set_apikey.dart';
+import 'package:ai_voice_assistant/screens/settings.dart';
 import 'package:ai_voice_assistant/services/stt.dart';
 import 'package:ai_voice_assistant/services/tts.dart';
 import 'package:ai_voice_assistant/services/openai.dart';
@@ -79,6 +78,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     }
   }
 
+  // Set Prompt as the first message of the list for chat messages
   void updateInitialPrompt(String s) {
     final initialPrompt = ChatCompletionMessage.user(
       content: ChatCompletionUserMessageContent.string(s),
@@ -91,6 +91,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     }
   }
 
+  // Auto scroll for chat messages
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (_scrollController.hasClients) {
@@ -103,6 +104,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     });
   }
 
+  // Method to start assistant
   Future<void> _startLoop() async {
     if (_loopRunning) return; // if lopp active, don't start again
 
@@ -119,7 +121,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         continue;
       }      
       
-      // STT
+      // STT - Speech to text
       final query = await listenOnce(_stt, _language!, setStatusText,
         setIsListening).catchError((_) => null);
       if (!_loopRunning || !mounted) break;
@@ -136,7 +138,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       
       if (!_loopRunning || !mounted) break;
 
-      // AI API answer
+      // AI answer
       _messages.add(ChatCompletionMessage.user(
         role: ChatCompletionMessageRole.user,
         content: ChatCompletionUserMessageContent.string(query),
@@ -159,7 +161,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       
       if (!_loopRunning || !mounted) break;
       
-      // TTS 
+      // TTS - Text to speech
       setState(() {
         _statusText = 'Speaking';
       });
@@ -172,8 +174,9 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     }
   }
 
+  // Method to stop assistant
   Future<void> _stopLoop() async {
-    if (_isListening) { return; }
+    if (_isListening) { return; } // Avoid problems during STT process
 
     _loopRunning = false;
     _isStopEnabled = false;
@@ -184,7 +187,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       _stt.cancel().catchError((_) => null),
       _tts.stop().catchError((_) => null),
     ]);
-    if (mounted) setState(() => _statusText = 'Application Stopped');
+    if (mounted) setState(() => _statusText = 'Application is stopped');
   }
 
   @override
@@ -212,12 +215,14 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       _apikey = apiKey;
     });
     
+    // Load assistant parameters
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final settings = ref.watch(settingsProvider);
       final initialMessage = ChatCompletionMessage.user(
         content: ChatCompletionUserMessageContent.string(settings.prompt),
       );
 
+      // Insert initial message
       if (!_isInitialMessageSet) {
         setState(() {
           _isInitialMessageSet = true;
@@ -225,6 +230,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         });
       }
 
+      // Parameters for STT, TTS and OpenAI
       setState(() {
         _language = settings.language;
         _voice = settings.voice;
@@ -264,6 +270,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
+            // AI Service
             Center(child: Text(
               'AI Service: $aiService',
               style: Theme.of(context).textTheme.titleLarge!.copyWith(
@@ -282,8 +289,8 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               ),
             ),
             const SizedBox(height:10),
-            // Messages
-            const Text('Messages:', style: TextStyle(color: Colors.white)),
+            // Chat messages
+            const Text('Chat messages:', style: TextStyle(color: Colors.white)),
             Expanded(              
               child: Container(
                 padding: const EdgeInsets.all(5),

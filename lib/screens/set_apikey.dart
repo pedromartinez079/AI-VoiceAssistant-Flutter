@@ -1,13 +1,10 @@
-// Set and Save APIKEY for XAI and or OpenAI
-// Verify apikey
-// Save apikey in a file, encrypted
-
-import 'package:ai_voice_assistant/providers/settings_provider.dart';
-import 'package:ai_voice_assistant/screens/assistant.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:openai_dart/openai_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:ai_voice_assistant/providers/settings_provider.dart';
+import 'package:ai_voice_assistant/screens/assistant.dart';
 
 class SetApiKeyScreen extends ConsumerStatefulWidget {
   const SetApiKeyScreen({super.key});
@@ -25,6 +22,7 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
   final List<String> _aiServices = ['openai', 'xai'];
   final _informationController = TextEditingController();
 
+  // Api Key is valid?
   Future<bool> checkapikey(String apiKey, String baseUrl) async {
     final client = OpenAIClient(
       apiKey: apiKey,
@@ -49,10 +47,10 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
     }
   }
 
+  // Save AI Service and Api Key
   Future<void> storeapikey(AiAuth aiauth) async {
     final prefs = await SharedPreferences.getInstance();
     try {
-      // await prefs.clear();
       await prefs.setString('ai', aiauth.ai);
       await prefs.setString('apikey', aiauth.apikey);
     } catch (e) {
@@ -66,12 +64,13 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.orange,
-          content: Text('Api Key saved.'),
+          content: Text('AI Service & Api Key saved.'),
         ),
       );
     }
   }
 
+  // Method for Set Api Key button
   void _saveApiKey() async {
     bool? isApiKeyOk;
     final apiKey = _apiKeyController.text;
@@ -81,20 +80,23 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
       return;
     }
 
+    // XAI or OpenAI?
     if (_selectedAi == 'xai') {
       isApiKeyOk = await checkapikey(apiKey, 'https://api.x.ai/v1');
     } else if (_selectedAi == 'openai') {
       isApiKeyOk = await checkapikey(apiKey, 'https://api.openai.com/v1');
     } else { return; }
     
+    // Set data in provider & save if api key is valid, if not return
     if (!isApiKeyOk) { return; }
-
+    
     ref.read(apiKeyProvider.notifier)
       .setApiKey(AiAuth(ai: aiService!, apikey: apiKey));
 
     storeapikey(AiAuth(ai: aiService, apikey: apiKey));
     
-    await Future.delayed(const Duration(milliseconds: 2000));
+    // Wait and go to Assistant screen
+    await Future.delayed(const Duration(milliseconds: 3000));
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) => const AiAssistantScreen(),

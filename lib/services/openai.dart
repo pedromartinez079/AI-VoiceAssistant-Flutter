@@ -1,7 +1,3 @@
-/*
-To Do:
-*/
-
 import 'dart:convert';
 
 import 'package:openai_dart/openai_dart.dart';
@@ -38,7 +34,6 @@ Future<String> processQuery(
       final response = await client.createChatCompletion(
         request: request,
       );
-      // print(model); print(temperature);
       return response.choices[0].message.content!;
     } catch(e) {
       if (e is OpenAIClientException) {
