@@ -43,3 +43,77 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Flutter/Dart/Pub related
+**/doc/api/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+generated_plugin_registrant.dart
+
+# Android related
+**/android/**/gradle-wrapper.jar
+**/android/**/gradle-wrapper.properties
+**/android/**/local.properties
+**/android/**/.gradle/
+**/android/**/build/
+**/android/**/captures/
+**/android/**/outputs/
+
+# iOS related
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/Flutter.framework/
+**/ios/Flutter/Flutter.podspec
+**/ios/Flutter/GeneratedPluginRegistrant.*
+**/ios/Flutter/app.framework/
+**/ios/Podfile.lock
+**/ios/Pods/
+**/ios/Runner.build/
+**/ios/Runner.xcworkspace/
+**/ios/build/
+**/ios/.symlinks/
+**/ios/.generated/
+
+# Mac related
+**/macos/Flutter/ephemeral/
+**/macos/Flutter/Flutter.podspec
+**/macos/Flutter/GeneratedPluginRegistrant.swift
+**/macos/Flutter/Flutter.framework
+**/macos/Flutter/app.framework
+**/macos/Podfile.lock
+**/macos/Pods/
+**/macos/Runner.xcworkspace/
+**/macos/Runner.build/
+**/macos/build/
+
+# Web related
+**/web/manifest.json
+**/web/favicon.png
+**/web/icons/Icon-192.png
+**/web/icons/Icon-512.png
+
+# Linux related
+**/linux/flutter/ephemeral/
+
+# Windows related
+**/windows/flutter/ephemeral/
+
+# Visual Studio
+**/.vscode/
+
+# IDEs
+.idea/
+*.iml
+
+# Other
+*.log
+*.lock
+*.pyc
+*.pyo
+*.swp
+*.swo
+.DS_Store

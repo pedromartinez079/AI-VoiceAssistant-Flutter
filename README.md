@@ -1,16 +1,47 @@
-# ai_voice_assistant
+# Ai-VoiceAssistant-Flutter
+**Voice interface to interact with Open AI or X AI.**
 
-A new Flutter project.
+## Built With
+- Flutter/Dart,
+- OpenAI API, XAI API
+- Visual Studio Code
 
-## Getting Started
+### Prerequisites
+- Get an [OpenAI account and an API key](https://platform.openai.com/docs/overview) or
+- Get an [XAI account and an API key](https://docs.x.ai/docs/overview)
 
-This project is a starting point for a Flutter application.
+### Install
+- Windows: Download exe file (Available soon!)[/]
+- Android: Google Play (Available soon!)[https://play.google.com]
 
-A few resources to get you started if this is your first Flutter project:
+### Usage
+- Open application, go to Set Api Key screen
+- Enter API Key
+- Select AI provider: OpenAI or XAI
+- Push Set Api Key button to save it and validate access
+- Go to assistant screen, push Start button
+- Now the application is ready to listen your prompts
+- Use Stop button to pause application
+- On the Settings screens you can select language, voice style, AI model, and temperature. You can also edit initial prompt to customize your assistant
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+## Authors
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+👤 **Pedro L. Martinez La Rosa**
+
+- Github: [@pedromartinez079](https://github.com/pedromartinez079)
+- Twitter: [@crypt079](https://twitter.com/crypt079)
+- Linkedin: [pedro-martínezlr](https://linkedin.com/in/pedro-martínezlr/?locale=en_US)
+
+## 🤝 Contributing
+
+Contributions, issues and feature requests are welcome!
+
+Feel free to check the [issues page](https://github.com/pedromartinez079/AI-VoiceAssistant-Flutter/issues).
+
+## Show your support
+
+Give a ⭐️ if you like this project!
+
+## 📝 License
+
+This project is [GNU GPLv3](COPYING) licensed.
