@@ -11,8 +11,8 @@
 - Get an [XAI account and an API key](https://docs.x.ai/docs/overview)
 
 ### Install
-- Windows: Download exe file (Available soon!)[]
-- Android: Google Play (Available soon!)[https://play.google.com]
+- Windows: [Download exe file (Available soon!)](/)
+- Android: [Google Play (Available soon!](https://play.google.com)
 
 ### Usage
 - Open application, go to Set Api Key screen
