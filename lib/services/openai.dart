@@ -17,7 +17,7 @@ Future<String> processQuery(
     if (ai == 'xai') { 
       baseUrl = 'https://api.x.ai/v1';
       if (aiModel.isEmpty || aiModel == '') {
-        model = ChatCompletionModel.modelId('grok-4');
+        model = ChatCompletionModel.modelId('grok-4-fast-reasoning');
       } else { model = ChatCompletionModel.modelId(aiModel); }
     }
     if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].contains(aiModel)) { temperature = 1; }

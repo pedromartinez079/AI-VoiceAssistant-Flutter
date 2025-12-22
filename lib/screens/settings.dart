@@ -140,8 +140,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         'ja-JP', 'ko-KR',       
         'zh-TW', 'zh-CN', 'ru-RU',
       ];
-      _modelsOpenAI = ['gpt-5.1','gpt-5','gpt-5-mini','gpt-5-nano','gpt-4.1',
-        'gpt-4.1-mini','gpt-4.1-nano'];
+      _modelsOpenAI = ['gpt-5.2','gpt-5.1','gpt-5','gpt-5-mini',
+        'gpt-5-nano','gpt-4.1','gpt-4.1-mini','gpt-4.1-nano'];
       _modelsXAI = ['grok-4-1-fast-reasoning','grok-4-1-fast-non-reasoning',
         'grok-4-1-fast', 'grok-4-fast-reasoning','grok-4-fast-non-reasoning',
         'grok-4'];
