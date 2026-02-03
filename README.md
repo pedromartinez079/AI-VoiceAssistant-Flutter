@@ -12,7 +12,7 @@
 
 ### Install
 - Windows: [Download exe file (Available soon!)](/)
-- Android: [Google Play (Available soon!)](https://play.google.com)
+- Android: [Google Play](https://play.google.com/store/apps/details?id=com.inkawall.ai_voice_assistant)
 
 ### Usage
 - Open application, go to Set Api Key screen
