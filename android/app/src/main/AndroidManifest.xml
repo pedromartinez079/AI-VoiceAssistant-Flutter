@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <application
-        android:label="ai_voice_assistant"
+        android:label="AI Voice Assistant"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity

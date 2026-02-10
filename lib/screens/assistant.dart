@@ -8,6 +8,7 @@ import 'package:openai_dart/openai_dart.dart';
 
 import 'package:ai_voice_assistant/screens/set_apikey.dart';
 import 'package:ai_voice_assistant/screens/settings.dart';
+import 'package:ai_voice_assistant/screens/about.dart';
 import 'package:ai_voice_assistant/services/stt.dart';
 import 'package:ai_voice_assistant/services/tts.dart';
 import 'package:ai_voice_assistant/services/openai.dart';
@@ -243,6 +244,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       appBar: AppBar(
         title: const Text('AI Assistant'),
         actions: [
+          // Settings screen
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -253,6 +255,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
             }, 
             icon: Icon(Icons.settings),
           ),
+          // SetApiKey screen
           IconButton(
             onPressed: () {
               Navigator.of(context).push(
@@ -262,6 +265,17 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
               );
             }, 
             icon: Icon(Icons.key),
+          ),
+          // About screen
+          IconButton(
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (ctx) => AboutScreen(),
+                )
+              );
+            },
+            icon: Icon(Icons.info),
           ),
         ],
       ),
