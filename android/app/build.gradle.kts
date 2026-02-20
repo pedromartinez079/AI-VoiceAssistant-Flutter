@@ -38,6 +38,7 @@ android {
         versionCode = 4
         versionName = "1.0.3"
     }
+    
 
     signingConfigs {
         create("release") {
