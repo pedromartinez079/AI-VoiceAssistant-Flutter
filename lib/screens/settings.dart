@@ -113,21 +113,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       prefs.setString('prompt', _promptController.text);
       // Update initial message for chat messages
       widget.updateInitialPrompt(_promptController.text);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          backgroundColor: Colors.orange,
-          content: Text(e.toString()),
-        ),
-      );
-    } finally {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           backgroundColor: Colors.orange,
           content: Text('Settings saved.'),
         ),
       );
-    }    
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          backgroundColor: Colors.orange,
+          content: Text(e.toString()),
+        ),
+      );
+    }   
   }
   
   @override
@@ -137,7 +138,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         'es-ES', 'es-US', 'pt-BR', 'pt-PT',
         'en-AU','en-US', 'en-GB', 'en-IN',
         'de-DE', 'fr-CA','fr-FR', 'it-IT', 'nl-NL', 'nl-BE','pl-PL',       
-        'ja-JP', 'ko-KR',       
+        'ja-JP', 'ko-KR', 'hi-IN',      
         'zh-TW', 'zh-CN', 'ru-RU',
       ];
       _modelsOpenAI = ['gpt-5.2','gpt-5.1','gpt-5','gpt-5-mini',
@@ -163,101 +164,103 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       appBar: AppBar(
         title: const Text('Settings'),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(10),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Select language
-              DropdownButtonFormField<String>(
-                initialValue: _selectedLanguage,
-                isExpanded: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Language',
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Select language
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedLanguage,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Language',
+                  ),
+                  items: _languages!
+                      .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ))
+                      .toList(),
+                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  onChanged: _onSelectLanguage,
                 ),
-                items: _languages!
-                    .map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(e),
-                        ))
-                    .toList(),
-                dropdownColor: Theme.of(context).colorScheme.surface,
-                onChanged: _onSelectLanguage,
-              ),
-              const SizedBox(height: 20,),
-              // Select voice
-              DropdownButtonFormField<String>(
-                initialValue: _selectedVoice,
-                isExpanded: true,
-                decoration: const InputDecoration(
-                  border: OutlineInputBorder(),
-                  labelText: 'Voice',
+                const SizedBox(height: 20,),
+                // Select voice
+                DropdownButtonFormField<String>(
+                  initialValue: _selectedVoice,
+                  isExpanded: true,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(),
+                    labelText: 'Voice',
+                  ),
+                  items: _voices
+                      .map((e) => DropdownMenuItem(
+                            value: e,
+                            child: Text(e),
+                          ))
+                      .toList(),
+                  dropdownColor: Theme.of(context).colorScheme.surface,
+                  onChanged: _onSelectVoice,
                 ),
-                items: _voices
-                    .map((e) => DropdownMenuItem(
-                          value: e,
-                          child: Text(e),
-                        ))
-                    .toList(),
-                dropdownColor: Theme.of(context).colorScheme.surface,
-                onChanged: _onSelectVoice,
-              ),
-              const SizedBox(height: 20,),
-              Row(
-                children: [
-                  // Select model
-                  Expanded(
-                    child: DropdownButtonFormField<String>(
-                      initialValue: _selectedModel,
-                      isExpanded: true,
-                      decoration: const InputDecoration(
-                        border: OutlineInputBorder(),
-                        labelText: 'AI Model',
+                const SizedBox(height: 20,),
+                Row(
+                  children: [
+                    // Select model
+                    Expanded(
+                      child: DropdownButtonFormField<String>(
+                        initialValue: _selectedModel,
+                        isExpanded: true,
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                          labelText: 'AI Model',
+                        ),
+                        items: _models!
+                            .map((e) => DropdownMenuItem(
+                                  value: e,
+                                  child: Text(e),
+                                ))
+                            .toList(),
+                        dropdownColor: Theme.of(context).colorScheme.surface,
+                        onChanged: _onSelectModel,
                       ),
-                      items: _models!
-                          .map((e) => DropdownMenuItem(
-                                value: e,
-                                child: Text(e),
-                              ))
-                          .toList(),
-                      dropdownColor: Theme.of(context).colorScheme.surface,
-                      onChanged: _onSelectModel,
                     ),
-                  ),
-                  // Select temperature
-                  Expanded(
-                    child: Slider(
-                      value: _selectedTemperature!,
-                      label: "Temperature $_selectedTemperature",
-                      min: 0,
-                      max: 2,
-                      divisions: 200,
-                      onChanged: _onSelectTemperature,
+                    // Select temperature
+                    Expanded(
+                      child: Slider(
+                        value: _selectedTemperature!,
+                        label: "Temperature $_selectedTemperature",
+                        min: 0,
+                        max: 2,
+                        divisions: 200,
+                        onChanged: _onSelectTemperature,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20,),              
-              // Edit prompt or initial message
-              TextField(
-                controller: _promptController,
-                readOnly: false,
-                maxLines: 7,
-                style: TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  labelText: 'AI Prompt',
-                  border: OutlineInputBorder(),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 20,),
-              ElevatedButton.icon(
-                onPressed: _saveSettings,
-                icon: const Icon(Icons.settings),
-                label: const Text('Save Settings'),
-              ),
-            ],
+                const SizedBox(height: 20,),              
+                // Edit prompt or initial message
+                TextField(
+                  controller: _promptController,
+                  readOnly: false,
+                  maxLines: 7,
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    labelText: 'AI Prompt',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 20,),
+                ElevatedButton.icon(
+                  onPressed: _saveSettings,
+                  icon: const Icon(Icons.settings),
+                  label: const Text('Save Settings'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

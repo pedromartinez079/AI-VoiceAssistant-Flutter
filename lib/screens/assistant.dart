@@ -279,74 +279,76 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
           ),
         ],
       ),
-      body: Padding(
-        padding: EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // AI Service
-            Center(child: Text(
-              'AI Service: $aiService',
-              style: Theme.of(context).textTheme.titleLarge!.copyWith(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              ),
-            ),            
-            const SizedBox(height:10),
-            // Application Status
-            Center(
-              child: Text(
-                _statusText,
-                style: Theme.of(context).textTheme.titleMedium!.copyWith(
+      body: SafeArea(
+        child: Padding(
+          padding: EdgeInsets.all(10),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // AI Service
+              Center(child: Text(
+                'AI Service: $aiService',
+                style: Theme.of(context).textTheme.titleLarge!.copyWith(
                   color: Theme.of(context).colorScheme.onSurface,
-                  ),
+                ),
+                ),
+              ),            
+              const SizedBox(height:10),
+              // Application Status
+              Center(
+                child: Text(
+                  _statusText,
+                  style: Theme.of(context).textTheme.titleMedium!.copyWith(
+                    color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                ),
               ),
-            ),
-            const SizedBox(height:10),
-            // Chat messages
-            const Text('Chat messages:', style: TextStyle(color: Colors.white)),
-            Expanded(              
-              child: Container(
-                padding: const EdgeInsets.all(5),
-                decoration: BoxDecoration(
-                    border: Border.all(color: Colors.white),                      
-                  ),
-                child: SingleChildScrollView(
-                  controller: _scrollController,                    
-                  child: Align(
-                    alignment: Alignment.topLeft,                    
-                    child: Text(
-                      _chatMessage,
-                      style: TextStyle(color: Colors.white),
+              const SizedBox(height:10),
+              // Chat messages
+              const Text('Chat messages:', style: TextStyle(color: Colors.white)),
+              Expanded(              
+                child: Container(
+                  padding: const EdgeInsets.all(5),
+                  decoration: BoxDecoration(
+                      border: Border.all(color: Colors.white),                      
+                    ),
+                  child: SingleChildScrollView(
+                    controller: _scrollController,                    
+                    child: Align(
+                      alignment: Alignment.topLeft,                    
+                      child: SelectableText(
+                        _chatMessage,
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height:10),
-            // Buttons Row
-            Row(
-              children: [
-                // Start
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _startLoop,
-                    icon: const Icon(Icons.play_arrow),
-                    label: const Text('Start'),
+              const SizedBox(height:10),
+              // Buttons Row
+              Row(
+                children: [
+                  // Start
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _startLoop,
+                      icon: const Icon(Icons.play_arrow),
+                      label: const Text('Start'),
+                    ),
                   ),
-                ),
-                const SizedBox(width: 5,),
-                // Stop
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _isStopEnabled ? _stopLoop : null,
-                    icon: const Icon(Icons.stop),
-                    label: const Text('Stop'),
+                  const SizedBox(width: 5,),
+                  // Stop
+                  Expanded(
+                    child: ElevatedButton.icon(
+                      onPressed: _isStopEnabled ? _stopLoop : null,
+                      icon: const Icon(Icons.stop),
+                      label: const Text('Stop'),
+                    ),
                   ),
-                ),
-              ],
-            ),
-          ],
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
