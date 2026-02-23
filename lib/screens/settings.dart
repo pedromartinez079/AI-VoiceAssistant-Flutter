@@ -90,7 +90,13 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       _selectedVoice = settings.getVoice();
     }
     if (_selectedModel == null || _selectedModel!.isEmpty) {
-      _selectedModel = settings.getModel();
+      var model = settings.getModel();
+      if (model.isNotEmpty) {
+        _selectedModel = settings.getModel();
+      } else {
+        _selectedModel = _models![0];
+      }
+      
     }
     _selectedTemperature ??= settings.getTemperature();
     if (_promptController.text.isEmpty) { return; }
@@ -134,13 +140,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {    
     setState(() {
-      _languages = [
-        'es-ES', 'es-US', 'pt-BR', 'pt-PT',
-        'en-AU','en-US', 'en-GB', 'en-IN',
-        'de-DE', 'fr-CA','fr-FR', 'it-IT', 'nl-NL', 'nl-BE','pl-PL',       
-        'ja-JP', 'ko-KR', 'hi-IN',      
-        'zh-TW', 'zh-CN', 'ru-RU',
-      ];
+      _languages = ['ar-DZ', 'ar-EG', 'bg-BG', 'cs-CZ', 'da-DK', 
+        'de-DE', 'en-AU', 'en-GB', 'en-IN', 'en-US', 'en-ZA', 'es-ES', 
+        'es-US', 'fi-FI', 'fr-CA', 'fr-FR', 'he-IL', 'hi-IN', 'hr-HR', 
+        'hu-HU', 'it-IT', 'is-IS', 'ja-JP', 'ko-KR', 'nb-NO', 'nl-BE', 
+        'nl-NL', 'pl-PL', 'pt-BR', 'pt-PT', 'ro-RO', 'ru-RU', 'sl-SI', 
+        'sr-RS', 'sk-SK', 'sv-SE', 'uk-UA', 'zh-CN', 'zh-TW'];
       _modelsOpenAI = ['gpt-5.2','gpt-5.1','gpt-5','gpt-5-mini',
         'gpt-5-nano','gpt-4.1','gpt-4.1-mini','gpt-4.1-nano'];
       _modelsXAI = ['grok-4-1-fast-reasoning','grok-4-1-fast-non-reasoning',

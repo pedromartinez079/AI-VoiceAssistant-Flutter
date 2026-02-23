@@ -29,7 +29,7 @@ Future<String?> listenOnce(stt, String language, Function setStatusText,
         }
       },
       onError: (e) {
-        setStatusText('STT Error: ${e.errorMsg})');
+        setStatusText('STT Error: ${e.errorMsg}');
         if (e.errorMsg.contains("no_match") || 
             e.errorMsg.contains("no recognition result")) {
           if (!completer.isCompleted) completer.complete(null);
