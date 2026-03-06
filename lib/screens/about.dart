@@ -112,6 +112,19 @@ class AboutScreen extends StatelessWidget {
                 SizedBox(height: 8),
                 GestureDetector(
                   onTap: () async {
+                    final Uri url = Uri.parse('https://www.anthropic.com/');
+                    if (await canLaunchUrl(url)) {
+                      await launchUrl(url);
+                    }
+                  },
+                  child: Text(
+                    'Anthropic',
+                    style: TextStyle(fontSize: 16, color: Colors.yellowAccent),
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
                     final Uri url = Uri.parse('https://openai.com/');
                     if (await canLaunchUrl(url)) {
                       await launchUrl(url);
