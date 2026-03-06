@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:openai_dart/openai_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:ai_voice_assistant/providers/settings_provider.dart';
 import 'package:ai_voice_assistant/screens/assistant.dart';
+import 'package:ai_voice_assistant/services/ai_router.dart';
 
 class SetApiKeyScreen extends ConsumerStatefulWidget {
   const SetApiKeyScreen({super.key});
@@ -19,33 +19,8 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
   final _apiKeyController = TextEditingController();
   bool _obscureApiKey = true;
   String? _selectedAi;
-  final List<String> _aiServices = ['openai', 'xai'];
+  final List<String> _aiServices = ['anthropic', 'openai', 'xai'];
   final _informationController = TextEditingController();
-
-  // Api Key is valid?
-  Future<bool> checkapikey(String apiKey, String baseUrl) async {
-    final client = OpenAIClient(
-      apiKey: apiKey,
-      baseUrl: baseUrl,
-    );
-
-    try {
-      final models = await client.listModels();
-      setState(() {
-        _informationController.text = 'Api Key Ok.\n\nModels in this API: ${models.data.length}';
-      });
-      client.endSession();
-      return true;
-    } catch (e) {      
-      if (e is OpenAIClientException) {
-        setState(() {
-          _informationController.text = e.body.toString();
-        });
-      }
-      client.endSession();
-      return false;
-    }
-  }
 
   // Save AI Service and Api Key
   Future<void> storeapikey(AiAuth aiauth) async {
@@ -82,12 +57,8 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
       return;
     }
 
-    // XAI or OpenAI?
-    if (_selectedAi == 'xai') {
-      isApiKeyOk = await checkapikey(apiKey, 'https://api.x.ai/v1');
-    } else if (_selectedAi == 'openai') {
-      isApiKeyOk = await checkapikey(apiKey, 'https://api.openai.com/v1');
-    } else { return; }
+    // Check if apikey is valid (ai_router.dart)
+    isApiKeyOk = await checkApiKey(_selectedAi!, apiKey, _setInformationController);
     
     // Set data in provider & save if api key is valid, if not return
     if (!isApiKeyOk) { return; }
@@ -105,6 +76,12 @@ class _SetApiKeyScreenState extends ConsumerState<SetApiKeyScreen> {
         builder: (ctx) => const AiAssistantScreen(),
       )
     );
+  }
+
+  _setInformationController(String s) {
+    setState(() {
+      _informationController.text = s;
+    });
   }
 
   @override

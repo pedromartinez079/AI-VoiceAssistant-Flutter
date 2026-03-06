@@ -27,6 +27,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
   List<String>? _modelsOpenAI;
   List<String>? _modelsXAI;
+  List<String>? _modelsAnthropic;
 
   void _onSelectModel(value) {
     setState(() {
@@ -35,16 +36,23 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   }
 
   void _onSelectTemperature(value) {
-    setState(() {
-      _selectedTemperature = value;
-    });
+    final ai = ref.watch(apiKeyProvider).ai;
+    if (ai == 'anthropic' && value > 1) {
+      setState(() {
+        _selectedTemperature = 1;
+      });
+    } else {
+      setState(() {
+        _selectedTemperature = value;
+      });
+    }
   }
 
   void _onSelectLanguage(value) {
     setState(() {
       _selectedLanguage = value;
     });
-    _getVoices(); // Update available voices for selected language
+    _getVoices(); // Update available voices for selected language    
   }
 
   void _onSelectVoice(value) {
@@ -66,14 +74,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     for (var v in filteredVoices) {
       voicesList.add(v['name']);
     }
-
-    setState(() {
-      _voices = [];
-      _voices = voicesList;
-    });
-
-    setState(() {
-      _selectedVoice = null;
+    
+    _voices = [];
+    setState(() {   
+      if (voicesList.isNotEmpty) {   
+        _voices = voicesList;
+        _selectedVoice = voicesList[0];
+      } else {
+        _voices = ['en-US-language','en-GB-language'];
+        _selectedVoice = _voices[0];
+      }
     });
   }
 
@@ -82,12 +92,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final settings = ref.read(settingsProvider.notifier);
     final prefs = await SharedPreferences.getInstance();
     
-    // If not change for a parameter, keep old value
+    // If not change for a parameter, try to keep old value
     if (_selectedLanguage == null || _selectedLanguage!.isEmpty) {
-      _selectedLanguage = settings.getLanguage();
+      var language = settings.getLanguage();
+      if (language.isNotEmpty) {
+        _selectedLanguage = settings.getLanguage();
+      } else {
+        _selectedLanguage = 'en-US';
+      }
     }
     if (_selectedVoice == null || _selectedVoice!.isEmpty) {
-      _selectedVoice = settings.getVoice();
+      var voice = settings.getVoice();
+      if (voice.isNotEmpty) {
+        _selectedVoice = settings.getVoice();
+      } else {
+        _selectedVoice = 'en-US-language';
+      }
     }
     if (_selectedModel == null || _selectedModel!.isEmpty) {
       var model = settings.getModel();
@@ -140,17 +160,19 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   void initState() {    
     setState(() {
-      _languages = ['ar-DZ', 'ar-EG', 'bg-BG', 'cs-CZ', 'da-DK', 
-        'de-DE', 'en-AU', 'en-GB', 'en-IN', 'en-US', 'en-ZA', 'es-ES', 
+      _languages = ['am-ET','ar-DZ', 'ar-EG', 'ar-SD', 'bg-BG', 'cs-CZ', 'da-DK', 
+        'de-DE', 'en-AU', 'en-GB', 'en-IN', 'en-KE', 'en-NG', 'en-UG', 'en-US', 'en-ZA', 'es-ES', 
         'es-US', 'fi-FI', 'fr-CA', 'fr-FR', 'he-IL', 'hi-IN', 'hr-HR', 
         'hu-HU', 'it-IT', 'is-IS', 'ja-JP', 'ko-KR', 'nb-NO', 'nl-BE', 
         'nl-NL', 'pl-PL', 'pt-BR', 'pt-PT', 'ro-RO', 'ru-RU', 'sl-SI', 
-        'sr-RS', 'sk-SK', 'sv-SE', 'uk-UA', 'zh-CN', 'zh-TW'];
+        'sr-RS', 'sk-SK', 'sv-SE', 'sw-TZ', 'th-TH', 'uk-UA', 'zh-CN', 'zh-TW'];
       _modelsOpenAI = ['gpt-5.2','gpt-5.1','gpt-5','gpt-5-mini',
         'gpt-5-nano','gpt-4.1','gpt-4.1-mini','gpt-4.1-nano'];
       _modelsXAI = ['grok-4-1-fast-reasoning','grok-4-1-fast-non-reasoning',
         'grok-4-1-fast', 'grok-4-fast-reasoning','grok-4-fast-non-reasoning',
         'grok-4'];
+      _modelsAnthropic = ['claude-opus-4-6', 'claude-sonnet-4-5', 
+        'claude-haiku-4-5'];
     });
     super.initState();
   }
@@ -163,6 +185,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final aiService = ref.watch(apiKeyProvider).ai;
     // Models depending on AI Service
     if (aiService == 'xai') { _models = _modelsXAI; }
+    else if (aiService == 'anthropic') { _models = _modelsAnthropic; }
     else { _models = _modelsOpenAI; }
     
     return Scaffold(
@@ -237,7 +260,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Expanded(
                       child: Slider(
                         value: _selectedTemperature!,
-                        label: "Temperature $_selectedTemperature",
+                        label: "Temperature $_selectedTemperature, "
+                          "ignore for gpt-5 & gpt-5-* models, "
+                          "anthropic [0-1]",
                         min: 0,
                         max: 2,
                         divisions: 200,

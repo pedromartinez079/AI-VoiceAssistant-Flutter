@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:flutter_tts/flutter_tts.dart';
-import 'package:openai_dart/openai_dart.dart';
 
 import 'package:ai_voice_assistant/screens/set_apikey.dart';
 import 'package:ai_voice_assistant/screens/settings.dart';
 import 'package:ai_voice_assistant/screens/about.dart';
 import 'package:ai_voice_assistant/services/stt.dart';
 import 'package:ai_voice_assistant/services/tts.dart';
-import 'package:ai_voice_assistant/services/openai.dart';
+import 'package:ai_voice_assistant/services/ai_router.dart';
 import 'package:ai_voice_assistant/providers/settings_provider.dart';
 
 class AiAssistantScreen extends ConsumerStatefulWidget {
@@ -29,7 +27,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
   String _statusText = 'Application Status';
   final _scrollController = ScrollController();
   String _chatMessage = '';
-  final List<ChatCompletionMessage> _messages = [];
+  final List<dynamic> _messages = [];
   bool _isInitialMessageSet = false;
   String? _ai;
   String? _apikey;
@@ -81,9 +79,7 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
 
   // Set Prompt as the first message of the list for chat messages
   void updateInitialPrompt(String s) {
-    final initialPrompt = ChatCompletionMessage.user(
-      content: ChatCompletionUserMessageContent.string(s),
-    );
+    final initialPrompt = { 'role': 'user', 'content': s,};
     
     if (_messages.isNotEmpty) {
       _messages[0] = initialPrompt;
@@ -140,19 +136,13 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
       if (!_loopRunning || !mounted) break;
 
       // AI answer
-      _messages.add(ChatCompletionMessage.user(
-        role: ChatCompletionMessageRole.user,
-        content: ChatCompletionUserMessageContent.string(query),
-      ));      
+      _messages.add({'role': 'user', 'content': query});
       
       final answer = await processQuery(
         _messages, _ai!, _apikey!, _aimodel!, _temperature!, setStatusText
       );
       
-      _messages.add(ChatCompletionMessage.assistant(
-        role: ChatCompletionMessageRole.assistant,
-        content: answer,
-      ));
+      _messages.add({'role': 'assistant', 'content': answer});
       if (mounted) {
         setState(() {
           _chatMessage += '\nAI: $answer';
@@ -219,15 +209,12 @@ class _AiAssistantScreenState extends ConsumerState<AiAssistantScreen> {
     // Load assistant parameters
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final settings = ref.watch(settingsProvider);
-      final initialMessage = ChatCompletionMessage.user(
-        content: ChatCompletionUserMessageContent.string(settings.prompt),
-      );
 
       // Insert initial message
       if (!_isInitialMessageSet) {
         setState(() {
           _isInitialMessageSet = true;
-          _messages.add(initialMessage);
+          _messages.add({'role':  'user', 'content': settings.prompt});
         });
       }
 

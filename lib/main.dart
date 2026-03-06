@@ -9,8 +9,10 @@ import 'package:ai_voice_assistant/screens/set_apikey.dart';
 
 final colorScheme = ColorScheme.fromSeed(
   brightness: Brightness.dark,
-  seedColor: const Color.fromARGB(255, 10, 51, 186),
-  surface: const Color.fromARGB(255, 10, 51, 186),
+  //seedColor: const Color.fromARGB(255, 10, 51, 186),
+  //surface: const Color.fromARGB(255, 10, 51, 186),
+  seedColor: const Color.fromARGB(255, 28, 86, 245),
+  surface: const Color.fromARGB(255, 28, 86, 245),
 );
 
 final theme = ThemeData().copyWith(
@@ -56,10 +58,10 @@ void main() async {
   }
 
   if (hasLanguage) { language = prefs.getString('language'); }
-  else { language = 'es-ES'; }
+  else { language = 'en-US'; }
 
   if (hasVoice) { voice = prefs.getString('voice'); }
-  else { voice = 'es-es-x-eea-local'; }
+  else { voice = 'en-US-language'; }
 
   if (hasModel) { model = prefs.getString('model'); }
   else { model = ''; }
@@ -69,7 +71,7 @@ void main() async {
 
   if (hasPrompt) { prompt = prefs.getString('prompt'); }
   else { prompt = (
-    'Eres un asistente personal inteligente y amable. Tus respuestas son convertidas a voz usando servicios de TTS, evita respuestas muy largas o caracteres que no se puedan convertir a voz.'
+    'You are an intelligent and friendly personal assistant. Your responses are converted to voice using TTS services, so only use words to respond, avoid very long answers unless otherwise requested, avoid characters that cannot be converted to voice, and use the language of the last message received.'
   ); }
 
   runApp(

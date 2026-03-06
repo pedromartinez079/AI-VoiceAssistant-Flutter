@@ -2,9 +2,10 @@ import 'dart:convert';
 
 import 'package:openai_dart/openai_dart.dart';
 
-Future<String> processQuery(
+Future<String> chatCompletionRequest(
   List<ChatCompletionMessage> messagesList, String ai, 
-  String apikey, String aiModel, double temperature, Function setStatusText) async { 
+  String apikey, String aiModel, double temperature
+) async { 
     String? baseUrl;
     ChatCompletionModel? model;
 
@@ -13,14 +14,18 @@ Future<String> processQuery(
       if (aiModel.isEmpty || aiModel == '') {
         model = ChatCompletionModel.modelId('gpt-4.1');
       } else { model = ChatCompletionModel.modelId(aiModel); }
-    }
-    if (ai == 'xai') { 
+    } else if (ai == 'xai') { 
       baseUrl = 'https://api.x.ai/v1';
       if (aiModel.isEmpty || aiModel == '') {
         model = ChatCompletionModel.modelId('grok-4-fast-reasoning');
       } else { model = ChatCompletionModel.modelId(aiModel); }
+    } else {
+      return 'Unknown AI service';
     }
-    if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].contains(aiModel)) { temperature = 1; }
+
+    if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].contains(aiModel)) { 
+      temperature = 1; 
+    }
 
     final client = OpenAIClient(
        apiKey: apikey,
@@ -28,9 +33,8 @@ Future<String> processQuery(
     );
 
     try {      
-      final messages = messagesList;
       final request = CreateChatCompletionRequest(
-        model: model!, messages: messages, temperature: temperature);
+        model: model, messages: messagesList, temperature: temperature);
       final response = await client.createChatCompletion(
         request: request,
       );
@@ -52,4 +56,59 @@ Future<String> processQuery(
       }      
       return 'Answer from $ai failed. ${e.toString()}';
     } finally { client.endSession(); }
+}
+
+
+Future<bool> checkApiKeyOpenai(String ai, String apiKey, 
+  Function setInformation) async {
+
+  String? baseUrl;
+
+  if (ai == 'openai') { 
+    baseUrl = 'https://api.openai.com/v1';
+  } else if (ai == 'xai') {
+    baseUrl = 'https://api.x.ai/v1';
+  } else { 
+    setInformation('AI service not known.');
+    return false; 
+  }
+
+  final client = OpenAIClient(
+    apiKey: apiKey,
+    baseUrl: baseUrl,
+  );
+  try {
+    final models = await client.listModels();
+    setInformation('Api Key Ok.\n\nModels in this API: ${models.data.length}');
+    client.endSession();
+    return true;
+  } catch (e) {      
+    if (e is OpenAIClientException) {
+      setInformation(e.body.toString());
+    }
+    client.endSession();
+    return false;
+  }
+}
+
+
+// messageList = [{'role': 'user', 'content': 'query'},...]
+List<ChatCompletionMessage> messageListOpenai(messageList) {
+  List<ChatCompletionMessage> messages = [];
+  for (dynamic m in messageList) {
+    if (m['role'] == 'user') {
+      messages.add(ChatCompletionMessage.user(
+        role: ChatCompletionMessageRole.user,
+        content: ChatCompletionUserMessageContent.string(m['content']),
+      ));
+    }
+    else if (m['role'] == 'assistant') {
+      messages.add(ChatCompletionMessage.assistant(
+        role: ChatCompletionMessageRole.assistant,
+        content: m['content'],
+      ));
+    }
+    else {}
+  }
+  return messages;
 }
