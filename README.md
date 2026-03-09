@@ -3,10 +3,11 @@
 
 ## Built With
 - Flutter/Dart,
-- OpenAI API, XAI API
+- Anthropic API, OpenAI API, XAI API
 - Visual Studio Code
 
 ### Prerequisites
+- Get an [Anthropic account and an API key](https://platform.claude.com/docs/en/home) or
 - Get an [OpenAI account and an API key](https://platform.openai.com/docs/overview) or
 - Get an [XAI account and an API key](https://docs.x.ai/docs/overview)
 
