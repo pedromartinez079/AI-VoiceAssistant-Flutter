@@ -3,7 +3,7 @@ import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
 
 Future<String> messageRequest(
   List<Message> messagesList, String ai, 
-  String apikey, String aiModel, double temperature
+  String apikey, String aiModel, dynamic temperature
 ) async {
   Model? model;
 
@@ -12,6 +12,10 @@ Future<String> messageRequest(
   } else { model = Model.modelId(aiModel); }
 
   if (temperature > 1) { temperature = 1; }
+
+  if (['claude-opus-4-7'].contains(aiModel)) { 
+    temperature = null; 
+  }
 
   final client = AnthropicClient(apiKey: apikey);
 

@@ -23,7 +23,7 @@ Future<String> chatCompletionRequest(
       return 'Unknown AI service';
     }
 
-    if (['gpt-5', 'gpt-5-mini', 'gpt-5-nano'].contains(aiModel)) { 
+    if (['gpt-5.5', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'].contains(aiModel)) { 
       temperature = 1; 
     }
 

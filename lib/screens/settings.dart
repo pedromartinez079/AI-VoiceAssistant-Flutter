@@ -166,12 +166,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         'hu-HU', 'it-IT', 'is-IS', 'ja-JP', 'ko-KR', 'nb-NO', 'nl-BE', 
         'nl-NL', 'pl-PL', 'pt-BR', 'pt-PT', 'ro-RO', 'ru-RU', 'sl-SI', 
         'sr-RS', 'sk-SK', 'sv-SE', 'sw-TZ', 'th-TH', 'uk-UA', 'zh-CN', 'zh-TW'];
-      _modelsOpenAI = ['gpt-5.2','gpt-5.1','gpt-5','gpt-5-mini',
-        'gpt-5-nano','gpt-4.1','gpt-4.1-mini','gpt-4.1-nano'];
-      _modelsXAI = ['grok-4-1-fast-reasoning','grok-4-1-fast-non-reasoning',
-        'grok-4-1-fast', 'grok-4-fast-reasoning','grok-4-fast-non-reasoning',
-        'grok-4'];
-      _modelsAnthropic = ['claude-opus-4-6', 'claude-sonnet-4-5', 
+      _modelsOpenAI = ['gpt-5.5','gpt-5.4','gpt-5.4-mini','gpt-5.4-nano',
+        'gpt-5','gpt-5-mini','gpt-5-nano','gpt-4.1','gpt-4.1-mini','gpt-4.1-nano'];
+      _modelsXAI = ['grok-4.3','grok-4.20-reasoning','grok-4.20-non-reasoning',
+        'grok-4-1-fast-reasoning','grok-4-1-fast-non-reasoning',
+        'grok-4-fast-reasoning','grok-4-fast-non-reasoning'];
+      _modelsAnthropic = ['claude-opus-4-7', 'claude-sonnet-4-6', 
         'claude-haiku-4-5'];
     });
     super.initState();
