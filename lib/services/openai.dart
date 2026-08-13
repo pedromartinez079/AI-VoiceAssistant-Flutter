@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:openai_dart/openai_dart.dart';
+import 'package:ai_voice_assistant/data/models.dart';
 
 Future<String> chatCompletionRequest(
   List<ChatCompletionMessage> messagesList, String ai, 
@@ -8,22 +9,26 @@ Future<String> chatCompletionRequest(
 ) async { 
     String? baseUrl;
     ChatCompletionModel? model;
+    List<String> listOpenAI = modelsOpenAI;
+    List<String> filteredListOpenAI = filteredModelsOpenAI;
+    List<String> listXAI = modelsXAI;
 
     if (ai == 'openai') { 
       baseUrl = 'https://api.openai.com/v1'; 
-      if (aiModel.isEmpty || aiModel == '') {
-        model = ChatCompletionModel.modelId('gpt-4.1');
+      if (aiModel.isEmpty || aiModel == '' || !listOpenAI.contains(aiModel)) {
+        model = ChatCompletionModel.modelId('gpt-5.6-luna');
+        temperature = 1;
       } else { model = ChatCompletionModel.modelId(aiModel); }
     } else if (ai == 'xai') { 
       baseUrl = 'https://api.x.ai/v1';
-      if (aiModel.isEmpty || aiModel == '') {
-        model = ChatCompletionModel.modelId('grok-4-fast-reasoning');
+      if (aiModel.isEmpty || aiModel == '' || !listXAI.contains(aiModel)) {
+        model = ChatCompletionModel.modelId('grok-4.20-0309-non-reasoning');
       } else { model = ChatCompletionModel.modelId(aiModel); }
     } else {
       return 'Unknown AI service';
     }
 
-    if (['gpt-5.5', 'gpt-5', 'gpt-5-mini', 'gpt-5-nano'].contains(aiModel)) { 
+    if (filteredListOpenAI.contains(aiModel)) { 
       temperature = 1; 
     }
 

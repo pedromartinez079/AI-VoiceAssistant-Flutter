@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:ai_voice_assistant/providers/settings_provider.dart';
+import 'package:ai_voice_assistant/data/models.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -166,13 +167,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         'hu-HU', 'it-IT', 'is-IS', 'ja-JP', 'ko-KR', 'nb-NO', 'nl-BE', 
         'nl-NL', 'pl-PL', 'pt-BR', 'pt-PT', 'ro-RO', 'ru-RU', 'sl-SI', 
         'sr-RS', 'sk-SK', 'sv-SE', 'sw-TZ', 'th-TH', 'uk-UA', 'zh-CN', 'zh-TW'];
-      _modelsOpenAI = ['gpt-5.5','gpt-5.4','gpt-5.4-mini','gpt-5.4-nano',
-        'gpt-5','gpt-5-mini','gpt-5-nano','gpt-4.1','gpt-4.1-mini','gpt-4.1-nano'];
-      _modelsXAI = ['grok-4.3','grok-4.20-reasoning','grok-4.20-non-reasoning',
-        'grok-4-1-fast-reasoning','grok-4-1-fast-non-reasoning',
-        'grok-4-fast-reasoning','grok-4-fast-non-reasoning'];
-      _modelsAnthropic = ['claude-opus-4-7', 'claude-sonnet-4-6', 
-        'claude-haiku-4-5'];
+      _modelsOpenAI = modelsOpenAI;
+      _modelsXAI = modelsXAI;
+      _modelsAnthropic = modelsAnthropic;
     });
     super.initState();
   }

@@ -1,19 +1,21 @@
 import 'dart:convert';
 import 'package:anthropic_sdk_dart/anthropic_sdk_dart.dart';
+import 'package:ai_voice_assistant/data/models.dart';
 
 Future<String> messageRequest(
   List<Message> messagesList, String ai, 
   String apikey, String aiModel, dynamic temperature
 ) async {
   Model? model;
+  List<String> listAnthropic = modelsAnthropic;
 
-  if (aiModel.isEmpty || aiModel == '') {
+  if (aiModel.isEmpty || aiModel == '' || !listAnthropic.contains(aiModel)) {
     model = Model.modelId('claude-haiku-4-5');
   } else { model = Model.modelId(aiModel); }
 
   if (temperature > 1) { temperature = 1; }
-
-  if (['claude-opus-4-7'].contains(aiModel)) { 
+  
+  if (['claude-opus-5','claude-sonnet-5'].contains(aiModel)) { 
     temperature = null; 
   }
 
